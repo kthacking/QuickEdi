@@ -62,14 +62,28 @@ const Nexus = {
 
         // Property Editing
         // We'll attach generic listeners for now
-        if(this.propInputs.width) this.propInputs.width.addEventListener('input', (e) => this.updateStyle('width', e.target.value));
-        if(this.propInputs.height) this.propInputs.height.addEventListener('input', (e) => this.updateStyle('height', e.target.value));
-        if(this.propInputs.bgColor) this.propInputs.bgColor.addEventListener('input', (e) => this.updateStyle('backgroundColor', e.target.value));
-        if(this.propInputs.radius) this.propInputs.radius.addEventListener('input', (e) => this.updateStyle('borderRadius', e.target.value));
-        
+        if (this.propInputs.width) this.propInputs.width.addEventListener('input', (e) => this.updateStyle('width', e.target.value));
+        if (this.propInputs.height) this.propInputs.height.addEventListener('input', (e) => this.updateStyle('height', e.target.value));
+        if (this.propInputs.bgColor) this.propInputs.bgColor.addEventListener('input', (e) => this.updateStyle('backgroundColor', e.target.value));
+        if (this.propInputs.radius) this.propInputs.radius.addEventListener('input', (e) => this.updateStyle('borderRadius', e.target.value));
+
+        // Export Feature
+        const btnExport = document.getElementById('btn-export');
+        if (btnExport) {
+            btnExport.addEventListener('click', () => {
+                const html = this.canvas.innerHTML;
+                navigator.clipboard.writeText(html).then(() => {
+                    alert('Full HTML copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy code. Check console.');
+                });
+            });
+        }
+
         // AI Input Mock
         const aiInput = document.querySelector('.ai-input');
-        if(aiInput) {
+        if (aiInput) {
             aiInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     this.mockAIGeneration(aiInput.value);
@@ -92,7 +106,7 @@ const Nexus = {
             // For this version, let's just append to flow to be beginner friendly, 
             // unless we want absolute positioning.
             // Let's stick to flow for now, but maybe later add absolute.
-            
+
             this.canvas.appendChild(newEl);
             this.selectElement(newEl);
         }
@@ -149,7 +163,7 @@ const Nexus = {
         this.selectedElement = el;
         // Visual indicator
         this.selectedElement.style.outline = '2px solid var(--color-accent)';
-        
+
         // Sync properties to sidebar (Basic mapping)
         // In a real app, this finds computed styles
         // this.propInputs.width.value = el.style.width;
@@ -174,7 +188,7 @@ const Nexus = {
         const aiBtn = document.querySelector('.ai-btn');
         const originalIcon = aiBtn.innerHTML;
         aiBtn.innerHTML = '<ion-icon name="sync" class="spin"></ion-icon>'; // Need to add spin animation class
-        
+
         setTimeout(() => {
             const el = this.createComponent('Card Basic');
             el.innerHTML = `<h3>Generated: ${prompt}</h3><p>AI created this based on your input.</p>`;
