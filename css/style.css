@@ -370,6 +370,78 @@ input:focus {
 }
 
 /* Optional: Preview Mode Exit Button */
-.exit-preview-btn:hover {
-    background: #333 !important;
+
+/* --- SELECTION & RESIZE HANDLES --- */
+.nexus-component {
+    position: relative;
+    /* Needed for handles positioning */
+    min-height: 20px;
+    /* Ensure drop target visibility */
+}
+
+/* The box showing selection */
+.selection-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid #FF3B30;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 100;
+}
+
+/* The handles */
+.resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #FFF;
+    border: 1px solid #FF3B30;
+    pointer-events: auto;
+    /* Catch clicks */
+    z-index: 101;
+}
+
+/* Corner positions */
+.handle-nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.handle-ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.handle-sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.handle-se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+/* Edge positions (optional, keeping simple for now with corners) */
+.handle-e {
+    top: 50%;
+    right: -5px;
+    transform: translateY(-50%);
+    cursor: e-resize;
+    height: 16px;
+}
+
+.handle-s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+    width: 16px;
 }
