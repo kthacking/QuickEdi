@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickForge - Nexus Builder</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Ionicons for clean UI icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+</head>
+
+<body>
+
+    <!-- Background Grid -->
+    <div class="bg-grid"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <ion-icon name="cube-outline" style="color: var(--color-accent); font-size: 24px;"></ion-icon>
+            Nexus<span>Builder</span>
+        </div>
+
+        <div class="top-actions">
+            <button class="btn btn-ghost">
+                <ion-icon name="eye-outline"></ion-icon> Preview
+            </button>
+            <button class="btn btn-ghost">
+                <ion-icon name="code-slash-outline"></ion-icon> Export
+            </button>
+            <button class="btn btn-primary">
+                Publish
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div id="app">
+        <!-- LEFT: Component Library -->
+        <aside class="sidebar">
+            <div class="sidebar-header">Library</div>
+            <div class="component-list">
+                <!-- Draggable Items -->
+                <div class="component-item" draggable="true">
+                    <div class="comp-preview"><ion-icon name="card-outline"></ion-icon></div>
+                    <div class="comp-name">Card Basic</div>
+                </div>
+                <div class="component-item" draggable="true">
+                    <div class="comp-preview"><ion-icon name="grid-outline"></ion-icon></div>
+                    <div class="comp-name">Hero Section</div>
+                </div>
+                <div class="component-item" draggable="true">
+                    <div class="comp-preview"><ion-icon name="text-outline"></ion-icon></div>
+                    <div class="comp-name">Text Block</div>
+                </div>
+                <div class="component-item" draggable="true">
+                    <div class="comp-preview"><ion-icon name="caret-forward-circle-outline"></ion-icon></div>
+                    <div class="comp-name">Button Primary</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER: Canvas -->
+        <main class="canvas-area">
+            <!-- The Editable Artboard -->
+            <div class="artboard" contenteditable="true">
+                <!-- Default Content -->
+                <div style="padding: 40px; text-align: center; font-family: 'Inter', sans-serif;">
+                    <h1 style="font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;">
+                        Build the Future.
+                    </h1>
+                    <p style="color: #666; font-size: 18px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                        Drag components from the left, edit properties on the right.
+                        This is the power of Nexus.
+                    </p>
+                    <div style="margin-top: 32px;">
+                        <button
+                            style="background: #FF3B30; color: white; border: none; padding: 12px 24px; border-radius: 99px; font-weight: 600; font-size: 16px;">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating AI Prompt -->
+            <div class="ai-bar-container">
+                <div class="ai-bar">
+                    <div class="ai-icon" style="padding: 0 8px; display: flex; align-items: center;">
+                        <ion-icon name="sparkles" style="color: #FF9500;"></ion-icon>
+                    </div>
+                    <input type="text" class="ai-input"
+                        placeholder="Describe a component (e.g., 'A pricing table with 3 cards')...">
+                    <button class="ai-btn">
+                        <ion-icon name="arrow-up"></ion-icon>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT: Inspector -->
+        <aside class="properties">
+            <div class="sidebar-header">Properties</div>
+
+            <div class="prop-group">
+                <label class="prop-label">Layout</label>
+                <div class="input-row">
+                    <input type="number" placeholder="W" value="100%">
+                    <input type="number" placeholder="H" value="Auto">
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Typography</label>
+                <select style="margin-bottom: 8px;">
+                    <option>Inter</option>
+                    <option>Roboto</option>
+                    <option>Playfair Display</option>
+                </select>
+                <div class="input-row">
+                    <input type="number" value="16">
+                    <input type="color" value="#000000" style="width: 32px; padding: 0;">
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Appearance</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px;">Background</span>
+                    <input type="color" value="#FFFFFF" style="width: 24px; height: 24px; border: none; padding: 0;">
+                </div>
+                <div class="input-row">
+                    <input type="text" placeholder="Radius (px)" value="8px">
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Shadows</label>
+                <select>
+                    <option>None</option>
+                    <option>Soft</option>
+                    <option>Medium</option>
+                    <option>Float</option>
+                </select>
+            </div>
+        </aside>
+    </div>
+
+    <script src="js/builder.js"></script>
+</body>
+
+</html>

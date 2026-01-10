@@ -1,0 +1,323 @@
+:root {
+    /* --- COLOR PALETTE (Momentum Theme) --- */
+    --color-bg: #F2F2F2;
+    --color-surface: #FFFFFF;
+    --color-surface-hover: #F9F9F9;
+    --color-border: #E0E0E0;
+    --color-grid: #D4D4D4;
+
+    --color-text-main: #111111;
+    --color-text-muted: #6B6B6B;
+    --color-text-invert: #FFFFFF;
+
+    /* The "Appreciation" Red Accent */
+    --color-accent: #FF3B30;
+    --color-accent-hover: #D63026;
+    --color-accent-faint: rgba(255, 59, 48, 0.08);
+
+    /* --- TYPOGRAPHY --- */
+    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* --- SPACING & SIZING --- */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-full: 999px;
+    /* Pill shapes */
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-float: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 0 4px var(--color-accent-faint);
+}
+
+/* --- RESET & BASE --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- BACKGROUND GRID (The Scientific Look) --- */
+.bg-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(var(--color-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- LAYOUT --- */
+#app {
+    display: flex;
+    flex: 1;
+    z-index: 1;
+    /* Above grid */
+    height: 100%;
+}
+
+/* --- HEADER --- */
+header {
+    height: 60px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 10;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo span {
+    color: var(--color-accent);
+}
+
+.top-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-muted);
+}
+
+.btn-ghost:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-main);
+}
+
+.btn-primary {
+    background: var(--color-accent);
+    color: var(--color-text-invert);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+/* --- SIDEBAR: COMPONENT LIBRARY --- */
+.sidebar {
+    width: 280px;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 16px 20px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.component-list {
+    padding: 0 16px;
+    overflow-y: auto;
+}
+
+.component-item {
+    padding: 12px;
+    background: var(--color-bg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    cursor: grab;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.component-item:hover {
+    background: #FFF;
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-sm);
+}
+
+.comp-preview {
+    height: 60px;
+    background: #EAEAEA;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #999;
+}
+
+.comp-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* --- CANVAS --- */
+.canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    /* See global grid through it */
+}
+
+.artboard {
+    width: 800px;
+    height: 90%;
+    background: #FFF;
+    border-radius: 2px;
+    box-shadow: var(--shadow-float);
+    position: relative;
+    overflow-y: auto;
+}
+
+/* --- PROPERTIES PANEL --- */
+.properties {
+    width: 300px;
+    background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    padding: 20px;
+}
+
+.prop-group {
+    margin-bottom: 24px;
+}
+
+.prop-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.input-row {
+    display: flex;
+    gap: 8px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    background: var(--color-bg);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-glow);
+}
+
+/* --- AI PROMPT BAR (Floating) --- */
+.ai-bar-container {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    z-index: 50;
+}
+
+.ai-bar {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    padding: 8px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    gap: 8px;
+}
+
+.ai-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+.ai-input:focus {
+    outline: none;
+}
+
+.ai-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF3B30, #FF9500);
+    border: none;
+    color: white;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
