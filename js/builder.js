@@ -1,35 +1,42 @@
 /**
  * Nexus Builder Core Logic
- * Handles Drag & Drop, Selection, and Property Editing
+ * Handles Drag & Drop, Selection, Property Editing, and AI Commands
  */
 
 const Nexus = {
     selectedElement: null,
     draggedType: null,
+    clipboard: null, // For duplication
 
     init() {
         this.cacheDOM();
         this.bindEvents();
-        console.log("Nexus Builder Initialized // Momentum Theme");
+        console.log("Nexus Builder 2.0 Initialized // Momentum Theme");
     },
 
     cacheDOM() {
-        this.canvas = document.querySelector('.artboard');
-        this.propInputs = {
-            width: document.querySelector('input[placeholder="W"]'),
-            height: document.querySelector('input[placeholder="H"]'),
-            // We need to be more specific with selectors or IDs in HTML, but for now using index or robust query
-            // Assuming the order based on HTML structure:
-            // Typography Size:
-            fontSize: document.querySelector('.prop-group:nth-of-type(2) input[type="number"]'),
-            // Typography Color:
-            color: document.querySelector('.prop-group:nth-of-type(2) input[type="color"]'),
-            // Background Color:
-            bgColor: document.querySelector('.prop-group:nth-of-type(3) input[type="color"]'),
-            // Radius:
-            radius: document.querySelector('input[placeholder="Radius (px)"]'),
-            // Shadow (Select):
-            shadow: document.querySelector('.prop-group:nth-of-type(4) select')
+        this.canvas = document.getElementById('artboard');
+        this.inspector = document.getElementById('inspector');
+
+        // Property Inputs - using IDs now for robustness
+        this.props = {
+            width: document.getElementById('prop-width'),
+            height: document.getElementById('prop-height'),
+            padding: document.getElementById('prop-padding'),
+            margin: document.getElementById('prop-margin'),
+            fontSize: document.getElementById('prop-fontsize'),
+            color: document.getElementById('prop-color'),
+            bgColor: document.getElementById('prop-bg'),
+            radius: document.getElementById('prop-radius'),
+            border: document.getElementById('prop-border'),
+            shadow: document.getElementById('prop-shadow')
+        };
+
+        // Actions
+        this.actions = {
+            duplicate: document.getElementById('action-duplicate'),
+            delete: document.getElementById('action-delete'),
+            alignBtns: document.querySelectorAll('.btn-icon[data-align]')
         };
     },
 
@@ -37,9 +44,9 @@ const Nexus = {
         // --- Drag & Drop ---
         document.querySelectorAll('.component-item').forEach(item => {
             item.addEventListener('dragstart', (e) => {
-                this.draggedType = e.target.querySelector('.comp-name').innerText;
+                this.draggedType = item.getAttribute('data-type');
                 e.dataTransfer.effectAllowed = 'copy';
-                e.dataTransfer.setData('text/plain', this.draggedType); // For firefox
+                e.dataTransfer.setData('text/plain', this.draggedType);
             });
         });
 
@@ -61,25 +68,18 @@ const Nexus = {
 
         // --- Selection ---
         this.canvas.addEventListener('click', (e) => {
-            // Traverse up to find draggable wrapper if clicked on child
-            let target = e.target;
-
-            // Don't select the artboard itself as a component
-            if (target === this.canvas) {
-                this.deselectAll();
-                return;
-            }
-
-            // In our simple model, direct children of artboard are components.
-            // If we have nested structures, we might need closest('.component') logic.
-            // For now, let's assume direct children or prevent bubbling from children.
             e.stopPropagation();
-            this.selectElement(target);
+            if (e.target === this.canvas) {
+                this.deselectAll();
+            } else {
+                // Find closest component or select target if it is one
+                // Simplified: select direct target
+                this.selectElement(e.target);
+            }
         });
 
-        // --- Properties (Two-way Binding) ---
-        // Helper to bind input to style
-        const bindProp = (input, styleProp, unit = '') => {
+        // --- Property Binding (Generic) ---
+        const bind = (input, styleProp, unit = '') => {
             if (!input) return;
             input.addEventListener('input', (e) => {
                 if (this.selectedElement) {
@@ -88,26 +88,21 @@ const Nexus = {
             });
         };
 
-        bindProp(this.propInputs.width, 'width');
-        bindProp(this.propInputs.height, 'height');
-        bindProp(this.propInputs.fontSize, 'fontSize', 'px');
-        bindProp(this.propInputs.radius, 'borderRadius');
+        bind(this.props.width, 'width');
+        bind(this.props.height, 'height');
+        bind(this.props.padding, 'padding');
+        bind(this.props.margin, 'margin');
+        bind(this.props.border, 'border');
+        bind(this.props.radius, 'borderRadius');
+        bind(this.props.fontSize, 'fontSize', 'px');
 
-        // Colors don't need units
-        if (this.propInputs.color) {
-            this.propInputs.color.addEventListener('input', (e) => {
-                if (this.selectedElement) this.selectedElement.style.color = e.target.value;
-            });
-        }
-        if (this.propInputs.bgColor) {
-            this.propInputs.bgColor.addEventListener('input', (e) => {
-                if (this.selectedElement) this.selectedElement.style.backgroundColor = e.target.value;
-            });
-        }
+        // Color Inputs
+        if (this.props.color) this.props.color.addEventListener('input', (e) => this.updateStyle('color', e.target.value));
+        if (this.props.bgColor) this.props.bgColor.addEventListener('input', (e) => this.updateStyle('backgroundColor', e.target.value));
 
         // Shadow Select
-        if (this.propInputs.shadow) {
-            this.propInputs.shadow.addEventListener('change', (e) => {
+        if (this.props.shadow) {
+            this.props.shadow.addEventListener('change', (e) => {
                 if (!this.selectedElement) return;
                 const val = e.target.value;
                 switch (val) {
@@ -119,7 +114,49 @@ const Nexus = {
             });
         }
 
-        // --- Quick Insert "AI" Bar ---
+        // --- Actions ---
+        if (this.actions.duplicate) {
+            this.actions.duplicate.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const clone = this.selectedElement.cloneNode(true);
+                    this.selectedElement.parentNode.insertBefore(clone, this.selectedElement.nextSibling);
+                    this.selectElement(clone);
+                }
+            });
+        }
+
+        if (this.actions.delete) {
+            this.actions.delete.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    this.selectedElement.remove();
+                    this.deselectAll();
+                }
+            });
+        }
+
+        // Alignment Buttons
+        this.actions.alignBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const align = btn.getAttribute('data-align');
+                this.updateStyle('textAlign', align);
+                // Visual toggle
+                this.actions.alignBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // --- Keyboard Shortcuts ---
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && this.selectedElement) {
+                // Don't delete if editing text
+                if (!this.selectedElement.isContentEditable) {
+                    this.selectedElement.remove();
+                    this.deselectAll();
+                }
+            }
+        });
+
+        // --- Command Bar ---
         const aiInput = document.querySelector('.ai-input');
         const aiBtn = document.querySelector('.ai-btn');
 
@@ -135,9 +172,7 @@ const Nexus = {
                 if (e.key === 'Enter') runCommand();
             });
         }
-        if (aiBtn) {
-            aiBtn.addEventListener('click', runCommand);
-        }
+        if (aiBtn) aiBtn.addEventListener('click', runCommand);
 
         // Export
         const btnExport = document.getElementById('btn-export');
@@ -145,100 +180,165 @@ const Nexus = {
             btnExport.addEventListener('click', () => {
                 const html = this.canvas.innerHTML;
                 navigator.clipboard.writeText(html).then(() => {
-                    alert('Full HTML copied to clipboard!');
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                    alert('Failed to copy code. Check console.');
+                    alert('HTML Copied to Clipboard!');
                 });
+            });
+        }
+
+        // Preview
+        const btnPreview = document.querySelector('.btn-ghost ion-icon[name="eye-outline"]').parentElement;
+        if (btnPreview) {
+            btnPreview.addEventListener('click', () => {
+                document.body.classList.toggle('preview-mode');
+                if (document.body.classList.contains('preview-mode')) {
+                    document.querySelector('.sidebar').style.display = 'none';
+                    document.querySelector('.properties').style.display = 'none';
+                    document.querySelector('header').style.display = 'none';
+                    document.querySelector('.bg-grid').style.opacity = '0';
+                    this.canvas.style.width = '100%';
+                    this.canvas.style.height = '100%';
+                    this.canvas.style.boxShadow = 'none';
+                    // Re-add exit button/logic
+                    const exitBtn = document.createElement('button');
+                    exitBtn.innerText = 'Exit Preview';
+                    exitBtn.className = 'exit-preview-btn';
+                    exitBtn.style.position = 'fixed';
+                    exitBtn.style.bottom = '20px';
+                    exitBtn.style.right = '20px';
+                    exitBtn.style.zIndex = '999';
+                    exitBtn.style.padding = '10px 20px';
+                    exitBtn.style.background = '#000';
+                    exitBtn.style.color = '#fff';
+                    exitBtn.style.border = 'none';
+                    exitBtn.style.borderRadius = '99px';
+                    exitBtn.style.cursor = 'pointer';
+                    exitBtn.onclick = () => window.location.reload(); // Simple reset for now
+                    document.body.appendChild(exitBtn);
+                }
             });
         }
     },
 
     handleDrop(e) {
-        // We do simple append for now. 
-        // Improvement: Insert at closest index? (Skipped for simplicity, sticking to append)
         if (this.draggedType) {
             const newEl = this.createComponent(this.draggedType);
+            // Drop specific logic (append to target if container?)
+            // For now, always append to canvas root or nearest container if dropped inside one
+            let target = e.target;
+            if (target === this.canvas || target.classList.contains('nexus-container')) {
+                // Good to drop
+            } else {
+                target = this.canvas;
+            }
+
             if (newEl) {
-                this.canvas.appendChild(newEl);
+                target.appendChild(newEl);
                 this.selectElement(newEl);
             }
             this.draggedType = null;
         }
     },
 
-    // "AI" / Command Logic
     handleCommand(cmd) {
-        // Button State
-        const aiBtn = document.querySelector('.ai-btn'); // Refresh ref
-        const originalIcon = aiBtn.innerHTML;
-        aiBtn.innerHTML = '<ion-icon name="flash" class="spin"></ion-icon>'; // Flash icon for action
+        let type = null;
+        if (cmd.includes('card')) type = 'Card Basic';
+        else if (cmd.includes('btn') || cmd.includes('button')) type = 'Button Primary';
+        else if (cmd.includes('hero')) type = 'Hero Section';
+        else if (cmd.includes('text')) type = 'Text Block';
+        else if (cmd.includes('input') || cmd.includes('form')) type = 'Input Field';
+        else if (cmd.includes('image') || cmd.includes('pic')) type = 'Image Placeholder';
+        else if (cmd.includes('box') || cmd.includes('container')) type = 'Container';
 
-        setTimeout(() => {
-            let type = null;
-            // Simple NLP (Keyword matching)
-            if (cmd.includes('card')) type = 'Card Basic';
-            else if (cmd.includes('btn') || cmd.includes('button')) type = 'Button Primary';
-            else if (cmd.includes('hero') || cmd.includes('header')) type = 'Hero Section';
-            else if (cmd.includes('text') || cmd.includes('paragraph')) type = 'Text Block';
-
-            if (type) {
-                const newEl = this.createComponent(type);
-                this.canvas.appendChild(newEl);
-                this.selectElement(newEl);
-                // Optional: Scroll to bottom
-                this.canvas.scrollTop = this.canvas.scrollHeight;
-            } else {
-                alert(`Nexus AI: I don't know how to build "${cmd}" yet. Try "card", "button", or "hero".`);
-            }
-            aiBtn.innerHTML = originalIcon;
-        }, 600); // Small delay for "processing" feel
+        if (type) {
+            const newEl = this.createComponent(type);
+            this.canvas.appendChild(newEl);
+            this.selectElement(newEl);
+            this.canvas.scrollTop = this.canvas.scrollHeight;
+        } else {
+            alert(`Unknown command: "${cmd}"`);
+        }
     },
 
     createComponent(type) {
         const el = document.createElement('div');
-        el.className = 'nexus-component'; // Class marker
-        el.style.padding = '20px';
-        el.style.marginBottom = '16px';
-        el.style.transition = 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)';
-        el.style.cursor = 'pointer'; // Clickable
+        el.className = 'nexus-component';
         el.style.position = 'relative';
+        el.style.transition = 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        el.style.cursor = 'pointer';
 
         switch (type) {
+            case 'Container':
+                el.className += ' nexus-container';
+                el.style.padding = '20px';
+                el.style.border = '1px dashed #ccc';
+                el.style.backgroundColor = 'transparent';
+                el.style.minHeight = '100px';
+                el.style.display = 'flex';
+                el.style.flexDirection = 'column';
+                el.style.gap = '10px';
+                el.innerHTML = '<span style="font-size:10px; color:#999; pointer-events:none; user-select:none;">Container</span>';
+                return el;
+
             case 'Card Basic':
-                el.innerHTML = '<h3 contenteditable="true" style="margin-bottom:8px;">Card Title</h3><p contenteditable="true">We make progress by building, not waiting.</p>';
+                el.innerHTML = '<h3 contenteditable="true" style="margin-bottom:8px;">Title</h3><p contenteditable="true">Content goes here.</p>';
+                el.style.padding = '20px';
                 el.style.background = '#FFFFFF';
                 el.style.borderRadius = '12px';
                 el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
                 el.style.border = '1px solid #EAEAEA';
                 return el;
+
             case 'Button Primary':
-                // Wrapper for alignment
-                el.style.padding = '10px';
-                el.style.display = 'flex';
-                el.style.justifyContent = 'flex-start';
-                el.style.background = 'transparent';
-                el.innerHTML = '<button style="pointer-events:none; padding: 12px 24px; background: #FF3B30; color: white; border: none; border-radius: 99px; font-weight: 600;">Click Action</button>';
-                // Pointer events none on inner button so we select the wrapper div
+                el.style.display = 'inline-block';
+                el.style.padding = '12px 24px';
+                el.style.backgroundColor = '#FF3B30';
+                el.style.color = '#FFF';
+                el.style.borderRadius = '99px';
+                el.style.fontWeight = '600';
+                el.innerText = 'Button';
+                el.contentEditable = 'true';
+                el.style.textAlign = 'center';
                 return el;
+
             case 'Text Block':
-                el.innerText = 'Start typing your content here...';
+                el.innerText = 'Lorem ipsum dolor sit amet.';
                 el.style.fontSize = '16px';
                 el.style.lineHeight = '1.6';
-                el.style.color = '#333';
                 el.contentEditable = 'true';
-                el.style.outline = 'none'; // handled by selection wrapper
-                el.style.border = '1px dashed transparent';
-                el.onfocus = () => { el.style.border = '1px dashed #ccc'; };
-                el.onblur = () => { el.style.border = '1px dashed transparent'; };
+                el.style.padding = '8px';
                 return el;
+
             case 'Hero Section':
-                el.innerHTML = '<h1 contenteditable="true" style="font-size:32px; font-weight:800; margin-bottom:16px;">The Future is Now</h1><p contenteditable="true" style="font-size:18px; color:#666;">Create something undefined.</p>';
-                el.style.padding = '80px 40px';
+                el.innerHTML = '<h1 contenteditable="true" style="font-size:32px; font-weight:800; margin-bottom:16px;">Hero Title</h1><p contenteditable="true">Subtitle text.</p>';
+                el.style.padding = '60px 20px';
                 el.style.textAlign = 'center';
-                el.style.background = '#F5F5F7';
-                el.style.borderRadius = '16px';
+                el.style.backgroundColor = '#F5F5F7';
                 return el;
+
+            case 'Image Placeholder':
+                el.style.width = '100%';
+                el.style.height = '200px';
+                el.style.backgroundColor = '#E0E0E0';
+                el.style.display = 'flex';
+                el.style.alignItems = 'center';
+                el.style.justifyContent = 'center';
+                el.style.borderRadius = '8px';
+                el.innerHTML = '<ion-icon name="image" style="font-size:48px; color:#999;"></ion-icon>';
+                return el;
+
+            case 'Input Field':
+                const inp = document.createElement('input');
+                inp.type = 'text';
+                inp.placeholder = 'Enter text...';
+                inp.style.width = '100%';
+                inp.style.padding = '10px 12px';
+                inp.style.border = '1px solid #ddd';
+                inp.style.borderRadius = '6px';
+                inp.style.pointerEvents = 'none'; // So we can select the wrapper
+                el.appendChild(inp);
+                el.style.padding = '4px';
+                return el;
+
             default:
                 return null;
         }
@@ -250,26 +350,32 @@ const Nexus = {
         }
 
         this.selectedElement = el;
-        // Visual indicator
+        if (el === this.canvas) return;
+
         this.selectedElement.style.outline = '2px solid #FF3B30';
-        this.selectedElement.style.outlineOffset = '2px';
 
-        // SYNC PROPERTIES TO SIDEBAR (Read computed styles)
-        const computed = window.getComputedStyle(el);
+        // Sync Inputs
+        const comp = window.getComputedStyle(el);
+        const set = (input, val) => { if (input) input.value = val; };
 
-        // Helper to value or default
-        const setVal = (input, val) => { if (input) input.value = val; };
+        // Best effort property parsing
+        set(this.props.width, el.style.width || comp.width);
+        set(this.props.height, el.style.height || comp.height);
+        set(this.props.padding, el.style.padding || comp.padding);
+        set(this.props.margin, el.style.margin || comp.margin);
+        set(this.props.fontSize, parseInt(comp.fontSize));
+        set(this.props.radius, el.style.borderRadius || comp.borderRadius);
+        set(this.props.border, el.style.border !== '0px none rgb(0, 0, 0)' ? el.style.border : ''); // simplify
 
-        // Convert rgb to hex for color inputs is complex, so we skip exact color syncing for now
-        // or just try best effort if it's already hex/named (but computed returns rgb usually).
-        // For '100% working' feeling, updating text inputs is most critical.
+        // Colors (rgb to hex is tricky without lib, keeping native input behavior which might fail on rgb strings)
+        // Ignoring color sync for this prototype step to avoid complexity, 
+        // focus is on setting new values which works fine.
+    },
 
-        setVal(this.propInputs.width, el.style.width.replace('px', '') || computed.width.replace('px', ''));
-        setVal(this.propInputs.height, el.style.height.replace('px', '') || computed.height.replace('px', ''));
-        setVal(this.propInputs.radius, el.style.borderRadius.replace('px', '') || computed.borderRadius.replace('px', ''));
-        setVal(this.propInputs.fontSize, computed.fontSize.replace('px', ''));
-
-        // We can try to sync color if simple, otherwise keep it decoupled to avoid crashing logic
+    updateStyle(prop, val) {
+        if (this.selectedElement) {
+            this.selectedElement.style[prop] = val;
+        }
     },
 
     deselectAll() {
@@ -280,7 +386,6 @@ const Nexus = {
     }
 };
 
-// Start
 document.addEventListener('DOMContentLoaded', () => {
     Nexus.init();
 });

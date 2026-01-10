@@ -140,6 +140,31 @@ header {
     box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
 }
 
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: 4px;
+    /* Soft square */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    border-color: var(--color-text-muted);
+}
+
+.btn-icon.active {
+    background: var(--color-text-main);
+    color: white;
+    border-color: var(--color-text-main);
+}
+
+
 /* --- SIDEBAR: COMPONENT LIBRARY --- */
 .sidebar {
     width: 280px;
@@ -189,7 +214,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 24px;
     color: #999;
 }
 
@@ -218,6 +243,7 @@ header {
     box-shadow: var(--shadow-float);
     position: relative;
     overflow-y: auto;
+    transition: all 0.3s;
 }
 
 /* --- PROPERTIES PANEL --- */
@@ -226,6 +252,7 @@ header {
     background: var(--color-surface);
     border-left: 1px solid var(--color-border);
     padding: 20px;
+    overflow-y: auto;
 }
 
 .prop-group {
@@ -306,7 +333,6 @@ input:focus {
     border: none;
     color: white;
     cursor: pointer;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -318,6 +344,32 @@ input:focus {
     }
 }
 
-.spin {
-    animation: spin 1s linear infinite;
+
+/* Additions for Theme Grid */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.theme-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    /* Square */
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.theme-swatch:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+/* Optional: Preview Mode Exit Button */
+.exit-preview-btn:hover {
+    background: #333 !important;
 }

@@ -77,24 +77,13 @@
         </aside>
 
         <!-- CENTER: Canvas -->
+        <!-- CENTER: Canvas -->
         <main class="canvas-area">
             <!-- The Editable Artboard -->
-            <div class="artboard" contenteditable="true">
-                <!-- Default Content -->
-                <div style="padding: 40px; text-align: center; font-family: 'Inter', sans-serif;">
-                    <h1 style="font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;">
-                        Build the Future.
-                    </h1>
-                    <p style="color: #666; font-size: 18px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                        Drag components from the left, edit properties on the right.
-                        This is the power of Nexus.
-                    </p>
-                    <div style="margin-top: 32px;">
-                        <button
-                            style="background: #FF3B30; color: white; border: none; padding: 12px 24px; border-radius: 99px; font-weight: 600; font-size: 16px;">
-                            Get Started
-                        </button>
-                    </div>
+            <div class="artboard" id="artboard" contenteditable="false">
+                <!-- Content will be dropped here -->
+                <div class="welcome-msg" style="padding: 40px; text-align: center; color: #999; pointer-events: none;">
+                    <p>Canvas Ready. Drop items here.</p>
                 </div>
             </div>
 
@@ -104,7 +93,7 @@
                     <div class="ai-icon" style="padding: 0 8px; display: flex; align-items: center;">
                         <ion-icon name="sparkles" style="color: #FF9500;"></ion-icon>
                     </div>
-                    <input type="text" class="ai-input" placeholder="Type 'card', 'button', 'hero' to insert...">
+                    <input type="text" class="ai-input" placeholder="Cmds: 'card', 'hero', 'btn', 'input'...">
                     <button class="ai-btn">
                         <ion-icon name="arrow-up"></ion-icon>
                     </button>
@@ -113,48 +102,83 @@
         </main>
 
         <!-- RIGHT: Inspector -->
-        <aside class="properties">
+        <aside class="properties" id="inspector">
             <div class="sidebar-header">Properties</div>
 
+            <!-- Actions -->
+            <div class="prop-group" style="display:flex; gap:8px; margin-bottom:16px;">
+                <button class="btn btn-ghost" id="action-duplicate" title="Duplicate"><ion-icon
+                        name="copy-outline"></ion-icon></button>
+                <button class="btn btn-ghost" id="action-delete" title="Delete" style="color:red;"><ion-icon
+                        name="trash-outline"></ion-icon></button>
+            </div>
+
             <div class="prop-group">
-                <label class="prop-label">Layout</label>
+                <label class="prop-label">Dimensions</label>
                 <div class="input-row">
-                    <input type="number" placeholder="W" value="100%">
-                    <input type="number" placeholder="H" value="Auto">
+                    <input type="text" id="prop-width" placeholder="W (e.g. 100%)">
+                    <input type="text" id="prop-height" placeholder="H (e.g. 50px)">
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Spacing (Pad / Marg)</label>
+                <div class="input-row">
+                    <input type="text" id="prop-padding" placeholder="Pad: 10px">
+                    <input type="text" id="prop-margin" placeholder="Marg: 10px">
                 </div>
             </div>
 
             <div class="prop-group">
                 <label class="prop-label">Typography</label>
-                <select style="margin-bottom: 8px;">
-                    <option>Inter</option>
-                    <option>Roboto</option>
-                    <option>Playfair Display</option>
-                </select>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <!-- Alignment -->
+                    <button class="btn-icon" id="align-left" data-align="left"><ion-icon
+                            name="text-outline"></ion-icon></button>
+                    <button class="btn-icon" id="align-center" data-align="center"><ion-icon
+                            name="list-outline"></ion-icon></button>
+                    <button class="btn-icon" id="align-right" data-align="right"><ion-icon
+                            name="menu-outline"></ion-icon></button>
+                </div>
                 <div class="input-row">
-                    <input type="number" value="16">
-                    <input type="color" value="#000000" style="width: 32px; padding: 0;">
+                    <input type="number" id="prop-fontsize" placeholder="Size" value="16">
+                    <input type="color" id="prop-color" value="#000000" style="width: 32px; padding: 0;">
                 </div>
             </div>
 
             <div class="prop-group">
                 <label class="prop-label">Appearance</label>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 12px;">Background</span>
-                    <input type="color" value="#FFFFFF" style="width: 24px; height: 24px; border: none; padding: 0;">
+                <div class="input-row" style="margin-bottom:8px;">
+                    <span style="font-size: 12px; flex:1;">Background</span>
+                    <input type="color" id="prop-bg" value="#FFFFFF"
+                        style="width: 24px; height: 24px; border: none; padding: 0;">
                 </div>
                 <div class="input-row">
-                    <input type="text" placeholder="Radius (px)" value="8px">
+                    <input type="text" id="prop-radius" placeholder="Radius (px)" value="8px">
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Theme Presets</label>
+                <div id="theme-grid" class="theme-grid">
+                    <!-- Configured via JS -->
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Border</label>
+                <div class="input-row">
+                    <input type="text" id="prop-border" placeholder="1px solid #ddd">
                 </div>
             </div>
 
             <div class="prop-group">
                 <label class="prop-label">Shadows</label>
-                <select>
-                    <option>None</option>
-                    <option>Soft</option>
-                    <option>Medium</option>
-                    <option>Float</option>
+                <select id="prop-shadow">
+                    <option value="None">None</option>
+                    <option value="Soft">Soft</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Float">Float</option>
                 </select>
             </div>
         </aside>
