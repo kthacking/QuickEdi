@@ -22,7 +22,7 @@
     <header>
         <div class="logo">
             <ion-icon name="cube-outline" style="color: var(--color-accent); font-size: 24px;"></ion-icon>
-            Nexus<span>Builder</span>
+            Quick<span>Edit</span>
         </div>
 
         <div class="top-actions">
@@ -70,7 +70,7 @@
                     <div class="comp-name">Image</div>
                 </div>
                 <div class="component-item" draggable="true" data-type="Input Field">
-                    <div class="comp-preview"><ion-icon name="text-input"></ion-icon></div>
+                    <div class="comp-preview"><ion-icon name="keypad-outline"></ion-icon></div>
                     <div class="comp-name">Input Field</div>
                 </div>
             </div>
@@ -150,6 +150,45 @@
                 </div>
             </div>
 
+            <!-- Flexbox Controls (Hidden by default via CSS or Logic if not flex) -->
+            <div class="prop-group" id="flex-controls" style="display:none;">
+                <label class="prop-label" style="display:flex; justify-content:space-between;">
+                    Flex Layout <span style="font-weight:400; font-size:10px; opacity:0.7;">(Container)</span>
+                </label>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <select id="prop-flex-dir">
+                        <option value="row">Row (→)</option>
+                        <option value="column">Column (↓)</option>
+                        <option value="row-reverse">Row Rev (←)</option>
+                        <option value="column-reverse">Col Rev (↑)</option>
+                    </select>
+                    <select id="prop-flex-wrap">
+                        <option value="nowrap">No Wrap</option>
+                        <option value="wrap">Wrap</option>
+                    </select>
+                </div>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <select id="prop-justify">
+                        <option value="flex-start">Justify: Start</option>
+                        <option value="center">Center</option>
+                        <option value="flex-end">End</option>
+                        <option value="space-between">Space Between</option>
+                        <option value="space-around">Space Around</option>
+                    </select>
+                </div>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <select id="prop-align">
+                        <option value="stretch">Align: Stretch</option>
+                        <option value="flex-start">Start</option>
+                        <option value="center">Center</option>
+                        <option value="flex-end">End</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="prop-gap" placeholder="Gap (e.g. 10px)">
+                </div>
+            </div>
+
             <div class="prop-group">
                 <label class="prop-label">Spacing (Pad / Marg)</label>
                 <div class="input-row">
@@ -160,18 +199,55 @@
 
             <div class="prop-group">
                 <label class="prop-label">Typography</label>
+
+                <!-- Font Family & Weight -->
                 <div class="input-row" style="margin-bottom:8px;">
-                    <!-- Alignment -->
-                    <button class="btn-icon" id="align-left" data-align="left"><ion-icon
-                            name="text-outline"></ion-icon></button>
-                    <button class="btn-icon" id="align-center" data-align="center"><ion-icon
-                            name="list-outline"></ion-icon></button>
-                    <button class="btn-icon" id="align-right" data-align="right"><ion-icon
-                            name="menu-outline"></ion-icon></button>
+                    <select id="prop-font-family" style="flex:2;">
+                        <option value="'Inter', sans-serif">Inter (Sans)</option>
+                        <option value="'JetBrains Mono', monospace">Mono</option>
+                        <option value="'Times New Roman', serif">Serif</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                    </select>
+                    <select id="prop-font-weight" style="flex:1;">
+                        <option value="400">Reg</option>
+                        <option value="500">Med</option>
+                        <option value="600">Semi</option>
+                        <option value="700">Bold</option>
+                        <option value="800">X-Bold</option>
+                    </select>
                 </div>
-                <div class="input-row">
-                    <input type="number" id="prop-fontsize" placeholder="Size" value="16">
+
+                <!-- Alignment & Styles -->
+                <div class="input-row" style="margin-bottom:8px;">
+                    <button class="btn-icon" id="align-left" data-align="left" title="Left"><ion-icon
+                            name="text-outline"></ion-icon></button>
+                    <button class="btn-icon" id="align-center" data-align="center" title="Center"><ion-icon
+                            name="list-outline"></ion-icon></button>
+                    <button class="btn-icon" id="align-right" data-align="right" title="Right"><ion-icon
+                            name="menu-outline"></ion-icon></button>
+                    <div style="width:1px; background:#ddd; margin:0 4px;"></div>
+                    <button class="btn-icon" id="style-italic" title="Italic"><ion-icon name="options-outline"
+                            style="transform: skewX(-10deg)"></ion-icon></button>
+                    <button class="btn-icon" id="style-underline" title="Underline"><ion-icon name="remove-outline"
+                            style="transform: translateY(3px)"></ion-icon></button>
+                </div>
+
+                <!-- Size, Color, Transform -->
+                <div class="input-row" style="margin-bottom:8px;">
+                    <input type="number" id="prop-fontsize" placeholder="Size" value="16" title="Font Size (px)">
                     <input type="color" id="prop-color" value="#000000" style="width: 32px; padding: 0;">
+                    <select id="prop-transform">
+                        <option value="none">Normal</option>
+                        <option value="uppercase">ALL CAPS</option>
+                        <option value="lowercase">lowercase</option>
+                        <option value="capitalize">Capitalize</option>
+                    </select>
+                </div>
+
+                <!-- Spacing -->
+                <div class="input-row">
+                    <input type="text" id="prop-line-height" placeholder="Line Ht (1.5)">
+                    <input type="text" id="prop-letter-spacing" placeholder="Spacing (px)">
                 </div>
             </div>
 
