@@ -121,14 +121,52 @@ const Nexus = {
         if (this.props.color) this.props.color.addEventListener('input', (e) => this.updateStyle('color', e.target.value));
         if (this.props.opacity) this.props.opacity.addEventListener('input', (e) => this.updateStyle('opacity', e.target.value));
 
+        // --- Actions ---
+        if (this.actions.duplicate) {
+            this.actions.duplicate.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const clone = this.selectedElement.cloneNode(true);
+                    // Insert after
+                    if (this.selectedElement.parentNode) {
+                        this.selectedElement.parentNode.insertBefore(clone, this.selectedElement.nextSibling);
+                        this.selectElement(clone);
+                    }
+                }
+            });
+        }
+
+        if (this.actions.delete) {
+            this.actions.delete.addEventListener('click', () => {
+                this.deleteSelected();
+            });
+        }
+
+        // Keys
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete') {
+                // If editing text, do not delete component
+                const active = document.activeElement;
+                const isEditingText = active.isContentEditable || (this.selectedElement && this.selectedElement.isContentEditable);
+
+                // Exception: if the wrapper itself is contenteditable (Text Block), we might be typing. 
+                // But usually we click *inside* to edit.
+                // Simple rule: if we are selecting the component wrapper (which makes resize handles visible), DELETE should remove it.
+                // If cursor is inside text, activeElement will be the text node or parent.
+
+                // If selection box is visible, we likely want to delete the component
+                if (this.selectedElement && !isEditingText) {
+                    this.deleteSelected();
+                }
+            }
+        });
+
         // --- Export ---
         const btnExport = document.getElementById('btn-export');
         if (btnExport) {
             btnExport.addEventListener('click', () => {
-                // Remove selection box before export
                 this.deselectAll();
                 const html = this.canvas.innerHTML;
-                navigator.clipboard.writeText(html).then(() => alert('Exported! (Selection tools helper removed)'));
+                navigator.clipboard.writeText(html).then(() => alert('Exported!'));
             });
         }
 
@@ -276,9 +314,21 @@ const Nexus = {
         this.syncProperties(el);
     },
 
+    deleteSelected() {
+        if (this.selectedElement) {
+            // Remove selection box first to avoid detaching handling issues
+            if (this.selectionBox) {
+                this.selectionBox.remove();
+                this.selectionBox = null;
+            }
+            this.selectedElement.remove();
+            this.selectedElement = null;
+        }
+    },
+
     deselectAll() {
         if (this.selectedElement && this.selectionBox) {
-            this.selectionBox.remove(); // Remove the handles DOM
+            this.selectionBox.remove();
             this.selectionBox = null;
         }
         this.selectedElement = null;
