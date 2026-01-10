@@ -36,7 +36,8 @@ const Nexus = {
             bgColor: document.getElementById('prop-bg'),
             radius: document.getElementById('prop-radius'),
             border: document.getElementById('prop-border'),
-            shadow: document.getElementById('prop-shadow')
+            shadow: document.getElementById('prop-shadow'),
+            opacity: document.getElementById('prop-opacity')
         };
 
         // Actions
@@ -118,6 +119,7 @@ const Nexus = {
 
         if (this.props.bgColor) this.props.bgColor.addEventListener('input', (e) => this.updateStyle('backgroundColor', e.target.value));
         if (this.props.color) this.props.color.addEventListener('input', (e) => this.updateStyle('color', e.target.value));
+        if (this.props.opacity) this.props.opacity.addEventListener('input', (e) => this.updateStyle('opacity', e.target.value));
 
         // --- Export ---
         const btnExport = document.getElementById('btn-export');
@@ -283,14 +285,17 @@ const Nexus = {
     },
 
     syncProperties(el) {
-        // ... (Same sync logic as before, abbreviated for brevity)
         const comp = window.getComputedStyle(el);
         const val = (id, v) => { if (this.props[id]) this.props[id].value = v; };
 
         val('width', el.style.width || comp.width);
         val('height', el.style.height || comp.height);
         val('padding', el.style.padding || comp.padding);
-        // ... etc
+        val('margin', el.style.margin || comp.margin);
+        val('fontSize', parseFloat(comp.fontSize));
+        val('radius', el.style.borderRadius || comp.borderRadius);
+        val('border', el.style.border !== '0px none rgb(0, 0, 0)' ? el.style.border : '');
+        val('opacity', comp.opacity); // Sync opacity
     },
 
     updateStyle(prop, val) {
@@ -379,32 +384,71 @@ const Nexus = {
     },
 
     initThemes() {
-        // Re-inject themes logic from before
+        // Diverse Themes: Solids, Gradients, Transparents, Retro, Neon
         const themes = [
+            // Essentials
             { name: 'White', val: '#FFFFFF' },
-            { name: 'Light', val: '#F5F5F7' },
-            { name: 'Dark', val: '#1D1D1F' },
-            { name: 'Black', val: '#000000' },
+            { name: 'Glass', val: 'rgba(255, 255, 255, 0.2)' }, // Transparent glass
+            { name: 'Off White', val: '#F9F9F9' },
+            { name: 'Dark Mode', val: '#121212' },
+            { name: 'Pitch Black', val: '#000000' },
+
+            // Vibrant Gradients
             { name: 'Sunset', val: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%)' },
-            { name: 'Ocean', val: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)' },
-            { name: 'Royal', val: 'linear-gradient(to right, #6a11cb 0%, #2575fc 100%)' },
-            { name: 'Fire', val: 'linear-gradient(135deg, #ff512f 0%, #dd2476 100%)' },
+            { name: 'Oceanic', val: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)' },
+            { name: 'Lush Green', val: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' },
+            { name: 'Royal Purple', val: 'linear-gradient(to right, #6a11cb 0%, #2575fc 100%)' },
+            { name: 'Cherry', val: 'linear-gradient(to right, #eb3349, #f45c43)' },
+            { name: 'Gold Rush', val: 'linear-gradient(to right, #f83600 0%, #f9d423 100%)' },
+
+            // Modern/Tech
+            { name: 'Cyberpunk', val: 'linear-gradient(45deg, #ff00cc, #333399)' },
+            { name: 'Midnight City', val: 'linear-gradient(to top, #232526, #414345)' },
+            { name: 'Electric', val: 'linear-gradient(to right, #4776E6, #8E54E9)' },
+            { name: 'Slate', val: '#64748b' },
+
+            // Soft/Pastel
+            { name: 'Peach', val: '#ffecd2' },
+            { name: 'Mint', val: '#d4fc79' },
+            { name: 'Lavender', val: '#e0c3fc' },
+
+            // Retro
+            { name: 'Retro Sun', val: 'linear-gradient(to right, #fc466b, #3f5efb)' },
+            { name: 'Old Paper', val: '#fdfbf7' },
         ];
+
         if (!this.themeGrid) return;
-        this.themeGrid.innerHTML = ''; // Clear prev
+        this.themeGrid.innerHTML = '';
+
         themes.forEach(t => {
-            const d = document.createElement('div');
-            d.className = 'theme-swatch';
-            d.style.background = t.val;
-            d.title = t.name;
-            d.onclick = () => {
+            const swatch = document.createElement('div');
+            swatch.className = 'theme-swatch';
+            swatch.style.background = t.val;
+            swatch.title = t.name;
+
+            // Border for light themes to be visible
+            if (t.val === '#FFFFFF' || t.val === '#F9F9F9' || t.val === '#fdfbf7') {
+                swatch.style.border = '1px solid #ccc';
+            }
+
+            swatch.onclick = () => {
                 if (this.selectedElement) {
                     this.selectedElement.style.background = t.val;
-                    if (t.name === 'Dark' || t.name === 'Black' || t.name === 'Royal') this.selectedElement.style.color = '#FFF';
-                    else this.selectedElement.style.color = '#000';
+
+                    // Smart Text Color
+                    const isDark = t.name.match(/Dark|Black|Cyber|Midnight|Royal|Ocean|Lush|Cherry|Retro|Gold/i);
+                    this.selectedElement.style.color = isDark ? '#FFFFFF' : '#111111';
+
+                    // If Glass, add backdrop blur
+                    if (t.name === 'Glass') {
+                        this.selectedElement.style.backdropFilter = 'blur(10px)';
+                        this.selectedElement.style.border = '1px solid rgba(255,255,255,0.3)';
+                    } else {
+                        this.selectedElement.style.backdropFilter = 'none';
+                    }
                 }
             }
-            this.themeGrid.appendChild(d);
+            this.themeGrid.appendChild(swatch);
         });
     }
 };
