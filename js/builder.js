@@ -38,6 +38,8 @@ const Nexus = {
             delete: document.getElementById('action-delete'),
             alignBtns: document.querySelectorAll('.btn-icon[data-align]')
         };
+
+        this.themeGrid = document.getElementById('theme-grid');
     },
 
     bindEvents() {
@@ -49,6 +51,9 @@ const Nexus = {
                 e.dataTransfer.setData('text/plain', this.draggedType);
             });
         });
+
+        // --- Themes Init ---
+        this.initThemes();
 
         this.canvas.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -383,6 +388,53 @@ const Nexus = {
             this.selectedElement.style.outline = 'none';
             this.selectedElement = null;
         }
+    },
+
+    initThemes() {
+        // 20 Themes (Gradients & Locals)
+        const themes = [
+            { name: 'White', val: '#FFFFFF' },
+            { name: 'Light Model', val: '#F5F5F7' },
+            { name: 'Dark', val: '#1D1D1F' },
+            { name: 'Deep Black', val: '#000000' },
+            { name: 'Sunset', val: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%)' },
+            { name: 'Ocean', val: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)' },
+            { name: 'Purple Love', val: 'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)' },
+            { name: 'Peach', val: 'linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%)' },
+            { name: 'Night Sky', val: 'linear-gradient(to top, #30cfd0 0%, #330867 100%)' },
+            { name: 'Midnight', val: 'linear-gradient(to right, #434343 0%, black 100%)' },
+            { name: 'Royal', val: 'linear-gradient(to right, #6a11cb 0%, #2575fc 100%)' },
+            { name: 'Gold', val: 'linear-gradient(to right, #f83600 0%, #f9d423 100%)' },
+            { name: 'Citrus', val: 'linear-gradient(to right, #fceabb 0%, #f8b500 100%)' },
+            { name: 'Carbon', val: 'linear-gradient(to right, #000000, #434343)' },
+            { name: 'Lush', val: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' },
+            { name: 'Fire', val: 'linear-gradient(135deg, #ff512f 0%, #dd2476 100%)' },
+            { name: 'Air', val: 'linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)' },
+            { name: 'Warmth', val: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)' },
+            { name: 'Soft Grass', val: 'linear-gradient(to top, #c1dfc4 0%, #deecdd 100%)' },
+            { name: 'Aqua', val: 'linear-gradient(to right, #00c6ff, #0072ff)' },
+        ];
+
+        if (!this.themeGrid) return;
+
+        themes.forEach(t => {
+            const swatch = document.createElement('div');
+            swatch.className = 'theme-swatch';
+            swatch.title = t.name;
+            swatch.style.background = t.val;
+
+            // Contrast helper
+            const isDark = (t.name === 'Dark' || t.name === 'Deep Black' || t.name === 'Midnight' || t.name === 'Carbon' || t.name === 'Night Sky' || t.name === 'Royal' || t.name === 'Fire');
+
+            swatch.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    this.selectedElement.style.background = t.val;
+                    this.selectedElement.style.color = isDark ? '#FFFFFF' : '#111111';
+                }
+            });
+
+            this.themeGrid.appendChild(swatch);
+        });
     }
 };
 
