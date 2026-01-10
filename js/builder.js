@@ -8,16 +8,18 @@ const Nexus = {
     draggedType: null,
     selectionBox: null, // The overlay DOM element
     isResizing: false,
+    isMoving: false, // New: Move state
 
-    // Resize state
+    // Resize/Move state
     resizeStart: { x: 0, y: 0, w: 0, h: 0 },
+    moveStart: { x: 0, y: 0, l: 0, t: 0 }, // New: Move start
     currentHandle: null,
 
     init() {
         this.cacheDOM();
         this.bindEvents();
-        this.initThemes(); // From previous step
-        console.log("Nexus Builder 3.0 Initialized // Nested + Resize");
+        this.initThemes();
+        console.log("Nexus Builder 3.1 Initialized // Positional Move");
     },
 
     cacheDOM() {
@@ -37,7 +39,15 @@ const Nexus = {
             radius: document.getElementById('prop-radius'),
             border: document.getElementById('prop-border'),
             shadow: document.getElementById('prop-shadow'),
-            opacity: document.getElementById('prop-opacity')
+            opacity: document.getElementById('prop-opacity'),
+            // New Position Props
+            position: document.getElementById('prop-position'),
+            float: document.getElementById('prop-float'),
+            top: document.getElementById('prop-top'),
+            left: document.getElementById('prop-left'),
+            right: document.getElementById('prop-right'),
+            bottom: document.getElementById('prop-bottom'),
+            zIndex: document.getElementById('prop-zindex')
         };
 
         // Actions
@@ -120,6 +130,16 @@ const Nexus = {
         if (this.props.bgColor) this.props.bgColor.addEventListener('input', (e) => this.updateStyle('backgroundColor', e.target.value));
         if (this.props.color) this.props.color.addEventListener('input', (e) => this.updateStyle('color', e.target.value));
         if (this.props.opacity) this.props.opacity.addEventListener('input', (e) => this.updateStyle('opacity', e.target.value));
+
+        // Position Binding
+        if (this.props.position) this.props.position.addEventListener('change', (e) => this.updateStyle('position', e.target.value));
+        if (this.props.float) this.props.float.addEventListener('change', (e) => this.updateStyle('float', e.target.value));
+
+        bind(this.props.top, 'top');
+        bind(this.props.left, 'left');
+        bind(this.props.right, 'right');
+        bind(this.props.bottom, 'bottom');
+        bind(this.props.zIndex, 'zIndex');
 
         // --- Actions ---
         if (this.actions.duplicate) {
@@ -236,7 +256,7 @@ const Nexus = {
         this.draggedType = null;
     },
 
-    // --- Resizing Logic ---
+    // --- Resizing & Moving Logic ---
     startResize(e, handle) {
         e.stopPropagation();
         this.isResizing = true;
@@ -251,31 +271,72 @@ const Nexus = {
         };
     },
 
+    startMove(e) {
+        if (!this.selectedElement) return;
+        this.isMoving = true;
+
+        // Auto-switch to absolute if static, to allow movement
+        const style = window.getComputedStyle(this.selectedElement);
+        if (style.position === 'static') {
+            const rect = this.selectedElement.getBoundingClientRect();
+            // We need to set it to absolute but keep it in same place relative to offsetParent
+            // Simplified: Set absolute. 
+            this.selectedElement.style.position = 'absolute';
+            // Note: In a real app this calculation is complex (finding offset parent coords).
+            // For now, let's assume direct canvas child or relative parent.
+            this.selectedElement.style.left = this.selectedElement.offsetLeft + 'px';
+            this.selectedElement.style.top = this.selectedElement.offsetTop + 'px';
+
+            if (this.props.position) this.props.position.value = 'absolute';
+        }
+
+        this.moveStart = {
+            x: e.clientX,
+            y: e.clientY,
+            l: this.selectedElement.offsetLeft,
+            t: this.selectedElement.offsetTop
+        };
+    },
+
     handleResizeMove(e) {
-        if (!this.isResizing || !this.selectedElement) return;
+        // RESIZING
+        if (this.isResizing && this.selectedElement) {
+            const dx = e.clientX - this.resizeStart.x;
+            const dy = e.clientY - this.resizeStart.y;
 
-        const dx = e.clientX - this.resizeStart.x;
-        const dy = e.clientY - this.resizeStart.y;
+            if (this.currentHandle.classList.contains('handle-se')) {
+                this.selectedElement.style.width = (this.resizeStart.w + dx) + 'px';
+                this.selectedElement.style.height = (this.resizeStart.h + dy) + 'px';
+            }
+            else if (this.currentHandle.classList.contains('handle-e')) {
+                this.selectedElement.style.width = (this.resizeStart.w + dx) + 'px';
+            }
+            else if (this.currentHandle.classList.contains('handle-s')) {
+                this.selectedElement.style.height = (this.resizeStart.h + dy) + 'px';
+            }
 
-        // Simple resizing (South-East handle logic primarily, others added)
-        if (this.currentHandle.classList.contains('handle-se')) {
-            this.selectedElement.style.width = (this.resizeStart.w + dx) + 'px';
-            this.selectedElement.style.height = (this.resizeStart.h + dy) + 'px';
-        }
-        else if (this.currentHandle.classList.contains('handle-e')) {
-            this.selectedElement.style.width = (this.resizeStart.w + dx) + 'px';
-        }
-        else if (this.currentHandle.classList.contains('handle-s')) {
-            this.selectedElement.style.height = (this.resizeStart.h + dy) + 'px';
+            if (this.props.width) this.props.width.value = this.selectedElement.style.width;
+            if (this.props.height) this.props.height.value = this.selectedElement.style.height;
+            return;
         }
 
-        // Sync Inputs Live
-        if (this.props.width) this.props.width.value = this.selectedElement.style.width;
-        if (this.props.height) this.props.height.value = this.selectedElement.style.height;
+        // MOVING
+        if (this.isMoving && this.selectedElement) {
+            const dx = e.clientX - this.moveStart.x;
+            const dy = e.clientY - this.moveStart.y;
+
+            this.selectedElement.style.left = (this.moveStart.l + dx) + 'px';
+            this.selectedElement.style.top = (this.moveStart.t + dy) + 'px';
+
+            // Sync Position Inputs
+            if (this.props.left) this.props.left.value = this.selectedElement.style.left;
+            if (this.props.top) this.props.top.value = this.selectedElement.style.top;
+        }
     },
 
     handleResizeEnd(e) {
         this.isResizing = false;
+        this.isMoving = false;
         this.currentHandle = null;
     },
 
@@ -291,7 +352,17 @@ const Nexus = {
             const overlay = document.createElement('div');
             overlay.className = 'selection-box';
 
-            // Allow pointer events on itself to be none, but handles have pointer-events:auto
+            // Note: pointer-events are set to none in CSS for the box, 
+            // BUT we want to capture drags. We can add a dedicated transparent move-layer OR 
+            // since we can't easily click-through if we capture all clicks, 
+            // we will bind the 'startMove' to the element itself in the global click parser 
+            // OR use a specific handle. 
+            // Current approach: The user requested "move every place". 
+            // Best UX: If clicking on the selection border or a "Move" handle?
+            // Let's add a "Move Handle" in the top-left or use the border.
+            // Simplified: We'll add a move handler to the component itself in bindEvents? 
+            // No, 'mousedown' on the selected element starts the move. 
+
             overlay.innerHTML = `
                 <div class="resize-handle handle-nw"></div>
                 <div class="resize-handle handle-ne"></div>
@@ -304,10 +375,21 @@ const Nexus = {
             el.appendChild(overlay);
             this.selectionBox = overlay;
 
-            // Bind Handle Events
+            // Resize Handles
             overlay.querySelectorAll('.resize-handle').forEach(h => {
                 h.addEventListener('mousedown', (e) => this.startResize(e, h));
             });
+
+            // Move: We attach a mousedown listener to the element (if not already handled)
+            // But we need to be careful not to trigger on content edit.
+            // Let's attach it to the element but check target.
+            el.onmousedown = (e) => {
+                // If target is a handle or input, ignore.
+                if (e.target.classList.contains('resize-handle')) return;
+                if (e.target.isContentEditable) return;
+                // If we are clicking on the element body, start move.
+                this.startMove(e);
+            };
         }
 
         // Sync Properties
@@ -316,7 +398,6 @@ const Nexus = {
 
     deleteSelected() {
         if (this.selectedElement) {
-            // Remove selection box first to avoid detaching handling issues
             if (this.selectionBox) {
                 this.selectionBox.remove();
                 this.selectionBox = null;
@@ -345,7 +426,16 @@ const Nexus = {
         val('fontSize', parseFloat(comp.fontSize));
         val('radius', el.style.borderRadius || comp.borderRadius);
         val('border', el.style.border !== '0px none rgb(0, 0, 0)' ? el.style.border : '');
-        val('opacity', comp.opacity); // Sync opacity
+        val('opacity', comp.opacity);
+
+        // Position & Layout
+        val('position', comp.position);
+        val('float', comp.float);
+        val('top', comp.top === 'auto' ? '' : comp.top);
+        val('left', comp.left === 'auto' ? '' : comp.left);
+        val('right', comp.right === 'auto' ? '' : comp.right);
+        val('bottom', comp.bottom === 'auto' ? '' : comp.bottom);
+        val('zIndex', comp.zIndex === 'auto' ? '' : comp.zIndex);
     },
 
     updateStyle(prop, val) {

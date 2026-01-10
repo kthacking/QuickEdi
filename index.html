@@ -122,6 +122,35 @@
             </div>
 
             <div class="prop-group">
+                <label class="prop-label">Position & Layout</label>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <select id="prop-position">
+                        <option value="static">Static</option>
+                        <option value="relative">Relative</option>
+                        <option value="absolute">Absolute</option>
+                        <option value="fixed">Fixed</option>
+                    </select>
+                    <select id="prop-float">
+                        <option value="none">Float: None</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                </div>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <input type="text" id="prop-top" placeholder="Top">
+                    <input type="text" id="prop-left" placeholder="Left">
+                </div>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <input type="text" id="prop-right" placeholder="Right">
+                    <input type="text" id="prop-bottom" placeholder="Bottom">
+                </div>
+                <div class="input-row">
+                    <input type="number" id="prop-zindex" placeholder="Z-Index">
+                    <span style="font-size:10px; color:#aaa; align-self:center;">Z-Index</span>
+                </div>
+            </div>
+
+            <div class="prop-group">
                 <label class="prop-label">Spacing (Pad / Marg)</label>
                 <div class="input-row">
                     <input type="text" id="prop-padding" placeholder="Pad: 10px">
