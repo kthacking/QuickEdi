@@ -190,6 +190,46 @@ const Nexus = {
             });
         }
 
+        // --- Preview Mode ---
+        const btnPreview = document.getElementById('btn-preview');
+        if (btnPreview) {
+            btnPreview.addEventListener('click', () => {
+                document.body.classList.toggle('preview-mode');
+                if (document.body.classList.contains('preview-mode')) {
+                    this.deselectAll();
+                    // Hide UI
+                    document.querySelector('.sidebar').style.display = 'none';
+                    document.querySelector('.properties').style.display = 'none';
+                    document.querySelector('header').style.display = 'none';
+                    document.querySelector('.bg-grid').style.opacity = '0';
+                    this.canvas.style.width = '100%';
+                    this.canvas.style.height = '100%';
+                    this.canvas.style.boxShadow = 'none';
+
+                    // Add Exit Button
+                    const exitBtn = document.createElement('button');
+                    exitBtn.innerText = 'Exit Preview';
+                    exitBtn.className = 'exit-preview-btn';
+                    exitBtn.style.position = 'fixed';
+                    exitBtn.style.bottom = '20px';
+                    exitBtn.style.right = '20px';
+                    exitBtn.style.zIndex = '999';
+                    exitBtn.style.padding = '10px 24px';
+                    exitBtn.style.background = '#000';
+                    exitBtn.style.color = '#fff';
+                    exitBtn.style.border = 'none';
+                    exitBtn.style.borderRadius = '99px';
+                    exitBtn.style.cursor = 'pointer';
+                    exitBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+
+                    exitBtn.onclick = () => {
+                        window.location.reload();
+                    };
+                    document.body.appendChild(exitBtn);
+                }
+            });
+        }
+
         // --- AI Command Bar ---
         const aiInput = document.querySelector('.ai-input');
         if (aiInput) {
