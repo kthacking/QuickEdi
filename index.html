@@ -153,10 +153,7 @@
                     <input type="color" id="prop-bg" value="#FFFFFF"
                         style="width: 24px; height: 24px; border: none; padding: 0;">
                 </div>
-                <div class="input-row" style="margin-bottom:8px;">
-                    <span style="font-size: 12px; flex:1;">Opacity</span>
-                    <input type="range" id="prop-opacity" min="0" max="1" step="0.1" value="1" style="flex:1;">
-                </div>
+                <!-- Opacity moved to Themes -->
                 <div class="input-row">
                     <input type="text" id="prop-radius" placeholder="Radius (px)" value="8px">
                 </div>
@@ -164,8 +161,12 @@
 
             <div class="prop-group">
                 <label class="prop-label">Theme Presets</label>
-                <div id="theme-grid" class="theme-grid">
+                <div id="theme-grid" class="theme-grid" style="margin-bottom:12px;">
                     <!-- Configured via JS -->
+                </div>
+                <div class="input-row">
+                    <span style="font-size: 12px; flex:1;">Intensity (Opacity)</span>
+                    <input type="range" id="prop-opacity" min="0" max="1" step="0.1" value="1" style="flex:1;">
                 </div>
             </div>
 
