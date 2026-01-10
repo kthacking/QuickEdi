@@ -44,22 +44,34 @@
         <aside class="sidebar">
             <div class="sidebar-header">Library</div>
             <div class="component-list">
-                <!-- Draggable Items -->
-                <div class="component-item" draggable="true">
+                <!-- Data-type attribute added for easier JS handling -->
+                <div class="component-item" draggable="true" data-type="Container">
+                    <div class="comp-preview"><ion-icon name="square-outline"></ion-icon></div>
+                    <div class="comp-name">Container</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="Card Basic">
                     <div class="comp-preview"><ion-icon name="card-outline"></ion-icon></div>
                     <div class="comp-name">Card Basic</div>
                 </div>
-                <div class="component-item" draggable="true">
+                <div class="component-item" draggable="true" data-type="Hero Section">
                     <div class="comp-preview"><ion-icon name="grid-outline"></ion-icon></div>
                     <div class="comp-name">Hero Section</div>
                 </div>
-                <div class="component-item" draggable="true">
+                <div class="component-item" draggable="true" data-type="Text Block">
                     <div class="comp-preview"><ion-icon name="text-outline"></ion-icon></div>
                     <div class="comp-name">Text Block</div>
                 </div>
-                <div class="component-item" draggable="true">
+                <div class="component-item" draggable="true" data-type="Button Primary">
                     <div class="comp-preview"><ion-icon name="caret-forward-circle-outline"></ion-icon></div>
                     <div class="comp-name">Button Primary</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="Image Placeholder">
+                    <div class="comp-preview"><ion-icon name="image-outline"></ion-icon></div>
+                    <div class="comp-name">Image</div>
+                </div>
+                <div class="component-item" draggable="true" data-type="Input Field">
+                    <div class="comp-preview"><ion-icon name="text-input"></ion-icon></div>
+                    <div class="comp-name">Input Field</div>
                 </div>
             </div>
         </aside>
@@ -92,8 +104,7 @@
                     <div class="ai-icon" style="padding: 0 8px; display: flex; align-items: center;">
                         <ion-icon name="sparkles" style="color: #FF9500;"></ion-icon>
                     </div>
-                    <input type="text" class="ai-input"
-                        placeholder="Describe a component (e.g., 'A pricing table with 3 cards')...">
+                    <input type="text" class="ai-input" placeholder="Type 'card', 'button', 'hero' to insert...">
                     <button class="ai-btn">
                         <ion-icon name="arrow-up"></ion-icon>
                     </button>
