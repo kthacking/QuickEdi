@@ -58,6 +58,11 @@ const Nexus = {
             if (el.style.border && el.style.border.includes('dashed')) {
                 el.style.border = '';
             }
+
+            // Remove empty class attributes
+            if (el.classList.length === 0) {
+                el.removeAttribute('class');
+            }
         });
 
 
