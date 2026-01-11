@@ -21,7 +21,39 @@ const Nexus = {
         console.log("Nexus Builder 3.4 Initialized // Typography Suite");
     },
 
-    // --- Persistence ---
+    // --- Export Helper ---
+    getFormattedHTML() {
+        // Clone the canvas to manipulate it without affecting the live view
+        const clone = this.canvas.cloneNode(true);
+
+        // Remove builder-specific elements
+        const selection = clone.querySelector('.selection-box');
+        if (selection) selection.remove();
+
+        const welcome = clone.querySelector('.welcome-msg');
+        if (welcome) welcome.remove();
+
+        // Clean up attributes
+        const allElements = clone.querySelectorAll('*');
+        allElements.forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.removeAttribute('draggable');
+            el.classList.remove('nexus-component'); // Remove builder hook class if desired, or keep for styling
+            // Note: If 'nexus-component' provides essential CSS (like relative positioning), we should keep or replace it.
+            // checking style.css: .nexus-component { position: relative; min-height: 20px; }
+            // essential for layout? maybe. Let's start by ONLY removing contenteditable.
+
+            // Re-adding nexus-component removal might break layout if specific styles are attached.
+            // Safest bet for "clean" export is removing contenteditable. 
+            // The user specifically asked "editbel text ... change that bug".
+        });
+
+        // Specific cleanup for editable text nodes to ensure they are static
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+
+        return clone.innerHTML;
+    },
+
     saveState() {
         if (!this.canvas) return;
         localStorage.setItem('nexus_content', this.canvas.innerHTML);
@@ -98,6 +130,63 @@ const Nexus = {
 
     bindEvents() {
         this.loadState();
+
+        // Export & Publish & Clear
+        const btnExport = document.getElementById('btn-export');
+        if (btnExport) {
+            btnExport.addEventListener('click', () => {
+                this.deselectAll();
+                const html = this.getFormattedHTML();
+                navigator.clipboard.writeText(html).then(() => alert('Exported to clipboard!'));
+            });
+        }
+
+        const btnPublish = document.getElementById('btn-publish');
+        if (btnPublish) {
+            btnPublish.addEventListener('click', () => {
+                this.deselectAll();
+                const cleanHTML = this.getFormattedHTML();
+                const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Published Site</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #FFF; }
+        * { box-sizing: border-box; }
+        /* Essential styles from builder that might be needed */
+        .nexus-container { display: flex; flex-direction: column; gap: 16px; min-height: 50px; }
+        .nexus-card { background: #FFF; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 24px; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+</head>
+<body>
+    ${cleanHTML}
+</body>
+</html>`;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'quick_edit_site.html';
+                a.click();
+            });
+        }
+
+        const btnClear = document.getElementById('btn-clear');
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear the canvas? This cannot be undone.')) {
+                    this.canvas.innerHTML = `
+                <div class="welcome-msg" style="padding: 40px; text-align: center; color: #999; pointer-events: none;">
+                    <p>Canvas Ready. Drop items here.</p>
+                </div>`;
+                    this.deselectAll();
+                    this.saveState();
+                }
+            });
+        }
 
         // Sidebar Toggle
         const toggleBtn = document.getElementById('btn-toggle-lib');
@@ -285,14 +374,7 @@ const Nexus = {
             }
         });
 
-        const btnExport = document.getElementById('btn-export');
-        if (btnExport) {
-            btnExport.addEventListener('click', () => {
-                this.deselectAll();
-                const html = this.canvas.innerHTML;
-                navigator.clipboard.writeText(html).then(() => alert('Exported!'));
-            });
-        }
+
 
         const btnPreview = document.getElementById('btn-preview');
         if (btnPreview) {
