@@ -156,10 +156,13 @@ const Nexus = {
             flexWrap: document.getElementById('prop-flex-wrap'),
             justify: document.getElementById('prop-justify'),
             align: document.getElementById('prop-align'),
-            gap: document.getElementById('prop-gap')
+            gap: document.getElementById('prop-gap'),
+            // Image
+            src: document.getElementById('prop-src')
         };
 
         this.flexGroup = document.getElementById('flex-controls');
+        this.imageGroup = document.getElementById('image-controls');
 
         // Actions
         this.actions = {
@@ -322,6 +325,20 @@ const Nexus = {
                 this.saveState();
             });
         };
+
+        // Image Src Bind
+        if (this.props.src) {
+            this.props.src.addEventListener('input', (e) => {
+                if (this.selectedElement) {
+                    // Check if it's an IMG tag or contains one
+                    const img = this.selectedElement.tagName === 'IMG' ? this.selectedElement : this.selectedElement.querySelector('img');
+                    if (img) {
+                        img.src = e.target.value;
+                        this.saveState();
+                    }
+                }
+            });
+        }
 
         // Dimensions
         bind(this.props.width, 'width');
@@ -650,6 +667,15 @@ const Nexus = {
                 this.flexGroup.style.display = 'none';
             }
         }
+
+        if (this.imageGroup) {
+            if (el.tagName === 'IMG' || el.querySelector('img')) {
+                this.imageGroup.style.display = 'block';
+            } else {
+                this.imageGroup.style.display = 'none';
+            }
+        }
+
         this.syncProperties(el);
     },
 
@@ -660,6 +686,7 @@ const Nexus = {
         }
         this.selectedElement = null;
         if (this.flexGroup) this.flexGroup.style.display = 'none';
+        if (this.imageGroup) this.imageGroup.style.display = 'none';
     },
 
     syncProperties(el) {
@@ -695,6 +722,12 @@ const Nexus = {
         val('justify', comp.justifyContent);
         val('align', comp.alignItems);
         val('gap', comp.gap === 'normal' ? '' : comp.gap);
+
+        // Image Src
+        if (this.props.src) {
+            const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+            this.props.src.value = img ? img.getAttribute('src') : '';
+        }
     },
 
     updateStyle(prop, val) {
@@ -744,13 +777,14 @@ const Nexus = {
             el.innerHTML = '<button style="padding:10px 20px; background:#FF3B30; color:white; border:none; border-radius:99px;" contenteditable="true">Button</button>';
             el.style.display = 'inline-block';
         } else if (type === 'Image Placeholder') {
-            el.style.width = '100px';
-            el.style.height = '100px';
-            el.style.background = '#EEF';
-            el.style.display = 'flex';
-            el.style.alignItems = 'center';
-            el.style.justifyContent = 'center';
-            el.innerHTML = '<ion-icon name="image"></ion-icon>';
+            const imgEl = document.createElement('img');
+            imgEl.className = 'nexus-component';
+            imgEl.src = 'https://via.placeholder.com/300x200';
+            imgEl.style.width = '100%';
+            imgEl.style.maxWidth = '300px';
+            imgEl.style.height = 'auto';
+            imgEl.style.display = 'block';
+            return imgEl;
         } else if (type === 'Input Field') {
             el.innerHTML = '<input type="text" placeholder="Input..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; pointer-events:none;">';
             el.style.width = '100%';
@@ -826,6 +860,117 @@ const Nexus = {
                 </div>
                 <button style="padding: 8px 16px; background: #000; color: white; border: none; border-radius: 6px; cursor: pointer;" contenteditable="true">Get Started</button>
             `;
+        } else if (type === 'Landing Page') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.innerHTML = `
+                <!-- Hero -->
+                <div style="text-align: center; padding: 100px 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                    <h1 style="font-size: 48px; margin-bottom: 24px; color: #333;" contenteditable="true">Build Faster with Nexus</h1>
+                    <p style="font-size: 20px; color: #666; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;" contenteditable="true">Drag, drop, and design professional websites in minutes. No coding required.</p>
+                    <button style="padding: 16px 32px; font-size: 18px; background: #000; color: white; border: none; border-radius: 8px; cursor: pointer;" contenteditable="true">Start Building Now</button>
+                    <div style="margin-top: 60px;">
+                        <img src="https://via.placeholder.com/800x400" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 80%; max-width: 800px;">
+                    </div>
+                </div>
+                <!-- Features -->
+                <div style="padding: 80px 20px; max-width: 1200px; margin: 0 auto;">
+                    <h2 style="text-align: center; margin-bottom: 60px;" contenteditable="true">Why Choose Us?</h2>
+                    <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px; text-align: center;">
+                            <ion-icon name="flash-outline" style="font-size: 48px; color: #FF3B30; margin-bottom: 16px;"></ion-icon>
+                            <h3 contenteditable="true">Lightning Fast</h3>
+                            <p style="color: #666;" contenteditable="true">Optimized for speed and performance right out of the box.</p>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; text-align: center;">
+                            <ion-icon name="layers-outline" style="font-size: 48px; color: #007AFF; margin-bottom: 16px;"></ion-icon>
+                            <h3 contenteditable="true">Easy Layers</h3>
+                            <p style="color: #666;" contenteditable="true">Manage complex layouts with our intuitive layer system.</p>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; text-align: center;">
+                            <ion-icon name="rocket-outline" style="font-size: 48px; color: #34C759; margin-bottom: 16px;"></ion-icon>
+                            <h3 contenteditable="true">Launch Ready</h3>
+                            <p style="color: #666;" contenteditable="true">Export clean, production-ready code in one click.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (type === 'Portfolio Grid') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.style.padding = '60px 20px';
+            el.style.background = '#111';
+            el.style.color = 'white';
+            el.innerHTML = `
+                <div style="max-width: 1200px; margin: 0 auto;">
+                    <h2 style="margin-bottom: 10px; font-size: 36px;" contenteditable="true">Selected Works</h2>
+                    <p style="color: #888; margin-bottom: 60px;" contenteditable="true">A collection of our recent digital experiences.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+                        <!-- Item 1 -->
+                        <div style="background: #222; border-radius: 12px; overflow: hidden; transition: transform 0.2s;">
+                            <div style="height: 200px; background: #333; display: flex; align-items: center; justify-content: center; color: #555;">Image</div>
+                            <div style="padding: 24px;">
+                                <h3 style="margin: 0 0 8px 0;" contenteditable="true">Project Alpha</h3>
+                                <p style="color: #888; font-size: 14px; margin: 0;" contenteditable="true">Brand Identity</p>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div style="background: #222; border-radius: 12px; overflow: hidden; transition: transform 0.2s;">
+                            <div style="height: 200px; background: #333; display: flex; align-items: center; justify-content: center; color: #555;">Image</div>
+                            <div style="padding: 24px;">
+                                <h3 style="margin: 0 0 8px 0;" contenteditable="true">Project Beta</h3>
+                                <p style="color: #888; font-size: 14px; margin: 0;" contenteditable="true">Web Development</p>
+                            </div>
+                        </div>
+                        <!-- Item 3 -->
+                        <div style="background: #222; border-radius: 12px; overflow: hidden; transition: transform 0.2s;">
+                            <div style="height: 200px; background: #333; display: flex; align-items: center; justify-content: center; color: #555;">Image</div>
+                            <div style="padding: 24px;">
+                                <h3 style="margin: 0 0 8px 0;" contenteditable="true">Project Gamma</h3>
+                                <p style="color: #888; font-size: 14px; margin: 0;" contenteditable="true">App Design</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (type === 'Pricing Table') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.style.padding = '80px 20px';
+            el.style.background = '#f9f9f9';
+            el.innerHTML = `
+                <div style="text-align: center; margin-bottom: 60px;">
+                    <h2 style="font-size: 36px; margin-bottom: 16px;" contenteditable="true">Simple Pricing</h2>
+                    <p style="color: #666;" contenteditable="true">Choose the plan that fits your needs.</p>
+                </div>
+                <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; max-width: 1200px; margin: 0 auto;">
+                    <!-- Basic -->
+                    <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); flex: 1; min-width: 300px; max-width: 350px;">
+                        <h3 style="color: #666; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;" contenteditable="true">Starter</h3>
+                        <div style="font-size: 48px; font-weight: 700; margin: 20px 0; color: #333;" contenteditable="true">$19<span style="font-size: 16px; color: #999; font-weight: 400;">/mo</span></div>
+                        <ul style="list-style: none; padding: 0; margin: 30px 0; color: #555; line-height: 2;">
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> 5 Projects</li>
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> Basic Analytics</li>
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> 24/7 Support</li>
+                        </ul>
+                        <button style="width: 100%; padding: 14px; background: white; border: 2px solid #000; color: #000; font-weight: 600; border-radius: 8px; cursor: pointer;" contenteditable="true">Get Started</button>
+                    </div>
+                    <!-- Pro -->
+                    <div style="background: #000; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); flex: 1; min-width: 300px; max-width: 350px; color: white; transform: scale(1.05);">
+                        <div style="text-align: right; margin-top: -20px; margin-bottom: 20px;"><span style="background: #FF3B30; font-size: 11px; padding: 4px 8px; border-radius: 99px; font-weight: 700;">POPULAR</span></div>
+                        <h3 style="color: #888; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;" contenteditable="true">Pro</h3>
+                        <div style="font-size: 48px; font-weight: 700; margin: 20px 0; color: white;" contenteditable="true">$49<span style="font-size: 16px; color: #666; font-weight: 400;">/mo</span></div>
+                        <ul style="list-style: none; padding: 0; margin: 30px 0; color: #ccc; line-height: 2;">
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> Unlimited Projects</li>
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> Advanced Analytics</li>
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> Priority Support</li>
+                            <li contenteditable="true"><ion-icon name="checkmark-circle" style="color: #34C759; margin-right: 8px;"></ion-icon> Custom Domain</li>
+                        </ul>
+                        <button style="width: 100%; padding: 14px; background: #FF3B30; border: none; color: white; font-weight: 600; border-radius: 8px; cursor: pointer;" contenteditable="true">Get Pro</button>
+                    </div>
+                </div>
+            `;
         }
 
         return el;
@@ -849,7 +994,10 @@ const Nexus = {
             'admin': 'Admin Dashboard',
             'auth': 'Auth Page',
             'nav': 'Navbar',
-            'navbar': 'Navbar'
+            'navbar': 'Navbar',
+            'landing': 'Landing Page',
+            'portfolio': 'Portfolio Grid',
+            'pricing': 'Pricing Table'
         };
 
         const parts = cmd.split('>').map(s => s.trim().toLowerCase());
