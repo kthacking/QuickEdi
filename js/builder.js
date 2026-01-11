@@ -99,6 +99,15 @@ const Nexus = {
     bindEvents() {
         this.loadState();
 
+        // Sidebar Toggle
+        const toggleBtn = document.getElementById('btn-toggle-lib');
+        const sidebar = document.getElementById('sidebar-library');
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+        }
+
         // Drag & Drop (Sidebar)
         document.querySelectorAll('.component-item').forEach(item => {
             item.addEventListener('dragstart', (e) => {

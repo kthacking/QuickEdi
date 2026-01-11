@@ -70,12 +70,13 @@ body {
     flex: 1;
     z-index: 1;
     /* Above grid */
-    height: 100%;
+    overflow: hidden;
 }
 
 /* --- HEADER --- */
 header {
     height: 60px;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--color-border);
@@ -172,6 +173,55 @@ header {
     border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
+    position: relative;
+    /* For toggle btn */
+    transition: width 0.3s ease;
+    overflow: visible;
+    /* Allow button to hang out */
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    border-right: none;
+}
+
+.sidebar.collapsed .sidebar-header,
+.sidebar.collapsed .component-list {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    /* Ensure immediate hide or fast fade */
+    transition: opacity 0.1s;
+}
+
+.sidebar-toggle {
+    position: absolute;
+    top: 18px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: #FFF;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+    color: var(--color-accent);
+    transform: scale(1.1);
+}
+
+.sidebar.collapsed .sidebar-toggle ion-icon {
+    transform: rotate(180deg);
 }
 
 .sidebar-header {
