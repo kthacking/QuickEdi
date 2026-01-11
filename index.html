@@ -25,6 +25,16 @@
             Quick<span>Edit</span>
         </div>
 
+        <div class="viewport-controls">
+            <button class="vp-btn active" data-size="100%" title="Desktop"><ion-icon
+                    name="desktop-outline"></ion-icon></button>
+            <button class="vp-btn" data-size="768px" title="Tablet"><ion-icon
+                    name="tablet-portrait-outline"></ion-icon></button>
+            <button class="vp-btn" data-size="375px" title="Mobile"><ion-icon
+                    name="phone-portrait-outline"></ion-icon></button>
+            <span class="vp-label">Desktop</span>
+        </div>
+
         <div class="top-actions">
             <button class="btn btn-ghost" id="btn-clear" style="color: #FF3B30;">
                 <ion-icon name="trash-bin-outline"></ion-icon> Clear
@@ -79,6 +89,10 @@
                     <div class="comp-preview"><ion-icon name="keypad-outline"></ion-icon></div>
                     <div class="comp-name">Input Field</div>
                 </div>
+                <div class="component-item" draggable="true" data-type="Navbar">
+                    <div class="comp-preview"><ion-icon name="menu-outline"></ion-icon></div>
+                    <div class="comp-name">Navbar</div>
+                </div>
 
                 <div class="sidebar-header" style="margin-top: 16px; border-top: 1px solid #eee; padding-top:16px;">
                     Templates</div>
@@ -97,6 +111,7 @@
         <!-- CENTER: Canvas -->
         <!-- CENTER: Canvas -->
         <main class="canvas-area">
+
             <!-- The Editable Artboard -->
             <div class="artboard" id="artboard" contenteditable="false">
                 <!-- Content will be dropped here -->
@@ -111,7 +126,8 @@
                     <div class="ai-icon" style="padding: 0 8px; display: flex; align-items: center;">
                         <ion-icon name="sparkles" style="color: #FF9500;"></ion-icon>
                     </div>
-                    <input type="text" class="ai-input" placeholder="Cmds: 'hero>card>image' OR 'card', 'hero', 'btn', 'input'... ">
+                    <input type="text" class="ai-input"
+                        placeholder="Cmds: 'hero>card>image' OR 'card', 'hero', 'btn', 'input'... ">
                     <button class="ai-btn">
                         <ion-icon name="arrow-up"></ion-icon>
                     </button>

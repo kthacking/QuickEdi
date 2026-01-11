@@ -46,12 +46,56 @@ const Nexus = {
                     el.style.pointerEvents = 'auto';
                 }
             }
+
+            // Remove builder artifacts (red outlines, etc.)
+            if (el.style.outline && el.style.outline.includes('dashed')) {
+                el.style.outline = '';
+            }
+            if (el.style.outlineOffset) {
+                el.style.outlineOffset = '';
+            }
+            // Remove dashed border common in builder containers
+            if (el.style.border && el.style.border.includes('dashed')) {
+                el.style.border = '';
+            }
         });
+
+
+
 
         // Specific cleanup for editable text nodes to ensure they are static
         clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
 
-        return clone.innerHTML;
+        // Handle Body Content with MaxWidth wrapper if needed
+        let bodyContent = clone.innerHTML;
+        const currentMaxWidth = this.canvas.style.maxWidth;
+        if (currentMaxWidth && currentMaxWidth !== '100%' && currentMaxWidth !== 'none') {
+            bodyContent = `<div style="max-width: ${currentMaxWidth}; margin: 0 auto; background: #FFF; min-height: 100vh;">${bodyContent}</div>`;
+        }
+
+        // Return COMPLETE HTML Document
+        const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickEdit Export</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #FFF; }
+        * { box-sizing: border-box; }
+        /* Essential styles from builder that might be needed */
+        .nexus-container { display: flex; flex-direction: column; gap: 16px; min-height: 50px; }
+        .nexus-card { background: #FFF; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 24px; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+</head>
+<body>
+    ${bodyContent}
+</body>
+</html>`;
+
+        return fullHTML;
     },
 
     saveState() {
@@ -136,8 +180,8 @@ const Nexus = {
         if (btnExport) {
             btnExport.addEventListener('click', () => {
                 this.deselectAll();
-                const html = this.getFormattedHTML();
-                navigator.clipboard.writeText(html).then(() => alert('Exported to clipboard!'));
+                const html = this.getFormattedHTML(); // Now returns full HTML
+                navigator.clipboard.writeText(html).then(() => alert('Full HTML copied to clipboard!'));
             });
         }
 
@@ -145,28 +189,8 @@ const Nexus = {
         if (btnPublish) {
             btnPublish.addEventListener('click', () => {
                 this.deselectAll();
-                const cleanHTML = this.getFormattedHTML();
-                const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Published Site</title>
-    <style>
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #FFF; }
-        * { box-sizing: border-box; }
-        /* Essential styles from builder that might be needed */
-        .nexus-container { display: flex; flex-direction: column; gap: 16px; min-height: 50px; }
-        .nexus-card { background: #FFF; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 24px; }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-</head>
-<body>
-    ${cleanHTML}
-</body>
-</html>`;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const fullHTML = this.getFormattedHTML(); // Already full HTML
+                const blob = new Blob([fullHTML], { type: 'text/html' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = 'quick_edit_site.html';
@@ -196,6 +220,36 @@ const Nexus = {
                 sidebar.classList.toggle('collapsed');
             });
         }
+
+        // Viewport Controls
+        const vpBtns = document.querySelectorAll('.vp-btn');
+        const vpLabel = document.querySelector('.vp-label');
+        if (vpBtns && vpLabel) {
+            vpBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    vpBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Set size
+                    const size = btn.getAttribute('data-size');
+                    const title = btn.getAttribute('title');
+
+                    if (size === '100%') {
+                        this.canvas.style.maxWidth = '100%';
+                        this.canvas.style.width = '100%';
+                    } else {
+                        this.canvas.style.width = size;
+                        this.canvas.style.maxWidth = size;
+                    }
+
+                    // Update label
+                    vpLabel.innerText = title;
+                });
+            });
+        }
+
+
 
         // Drag & Drop (Sidebar)
         document.querySelectorAll('.component-item').forEach(item => {
@@ -472,8 +526,16 @@ const Nexus = {
         this.canvas.style.outline = '';
     },
 
+    checkEmptyState() {
+        const welcome = this.canvas.querySelector('.welcome-msg');
+        if (welcome) welcome.remove();
+    },
+
     handleDrop(e) {
         if (!this.draggedType) return;
+
+        this.checkEmptyState();
+
         const newEl = this.createComponent(this.draggedType);
         const target = this.getDropTarget(e.target);
         if (newEl && target) {
@@ -740,6 +802,25 @@ const Nexus = {
                     <p style="margin-top: 20px; font-size: 14px; color: #666;" contenteditable="true">Don't have an account? <span style="color: #FF3B30;">Sign up</span></p>
                 </div>
             `;
+        } else if (type === 'Navbar') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.style.padding = '16px 32px';
+            el.style.background = '#FFF';
+            el.style.display = 'flex';
+            el.style.justifyContent = 'space-between';
+            el.style.alignItems = 'center';
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+            el.innerHTML = `
+                <div style="font-weight: 700; font-size: 20px; color: #333;" contenteditable="true">Brand</div>
+                <div style="display: flex; gap: 24px;">
+                    <a href="#" style="text-decoration: none; color: #555; font-weight: 500;" contenteditable="true">Home</a>
+                    <a href="#" style="text-decoration: none; color: #555; font-weight: 500;" contenteditable="true">About</a>
+                    <a href="#" style="text-decoration: none; color: #555; font-weight: 500;" contenteditable="true">Services</a>
+                    <a href="#" style="text-decoration: none; color: #555; font-weight: 500;" contenteditable="true">Contact</a>
+                </div>
+                <button style="padding: 8px 16px; background: #000; color: white; border: none; border-radius: 6px; cursor: pointer;" contenteditable="true">Get Started</button>
+            `;
         }
 
         return el;
@@ -761,7 +842,9 @@ const Nexus = {
             'text': 'Text Block',
             'p': 'Text Block',
             'admin': 'Admin Dashboard',
-            'auth': 'Auth Page'
+            'auth': 'Auth Page',
+            'nav': 'Navbar',
+            'navbar': 'Navbar'
         };
 
         const parts = cmd.split('>').map(s => s.trim().toLowerCase());
@@ -794,6 +877,7 @@ const Nexus = {
         });
 
         if (root) {
+            this.checkEmptyState();
             this.canvas.appendChild(root);
             this.selectElement(root);
             this.canvas.scrollTop = this.canvas.scrollHeight;

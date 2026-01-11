@@ -279,15 +279,73 @@ header {
     position: relative;
     overflow: hidden;
     display: flex;
+    /* Revert to row/center as controls are gone from here */
     align-items: center;
     justify-content: center;
     background: transparent;
     /* See global grid through it */
 }
 
+.viewport-controls {
+    /* Header integration */
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--color-border);
+    padding: 4px 8px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 24px;
+    /* Space from logo */
+}
+
+.vp-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.vp-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-main);
+}
+
+.vp-btn.active {
+    background: var(--color-text-main);
+    color: white;
+}
+
+.vp-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    color: var(--color-text-muted);
+    min-width: 50px;
+    display: none;
+    /* Hide label to save space in header if needed, or keep. user asked to 'fix' it. */
+}
+
+/* Show label on larger screens only? */
+@media (min-width: 1000px) {
+    .vp-label {
+        display: block;
+    }
+}
+
 .artboard {
-    width: 680px;
-    height: 100%;
+    width: 100%;
+    /* Free look: full width */
+    max-width: none;
+    min-height: 100%;
+    height: auto;
     background: #FFF;
     border-radius: 0;
     box-shadow: var(--shadow-float);
