@@ -1,73 +1,68 @@
-# QuickEdit: Smart Live Components Builder ("Nexus") - Design & Implementation Plan
+# QuickEdit: Smart Live Components Builder ("Nexus")
 
-## 1. Feature Overview
-**Name**: **Nexus Builder** (The connector of code and design)
-**Goal**: Transform QuickEdit from a code editor into a visual site builder.
-**Vibe**: Scientific, Industrial, Swiss Design (inspired by the provided reference). Precision tools for creative minds.
+## 1. Project Overview
+**Nexus Builder** is a lightweight, visual site builder designed for "QuickEdi". It transforms a standard coding environment into a drag-and-drop workbench, bridging the gap between design and code.
+**Philosophy**: "Progress over Perfection." Industrial, precise, and efficient.
 
-## 2. Visual Identity (The "Momentum" Theme)
-Based on your reference image, the design language dictates:
-- **Philosophy**: "Progress over Perfection." Clean, grid-based, honest.
-- **Color Palette**:
-    - **Canvas Background**: `#F0F0F2` (Soft industrial gray)
-    - **Grid Lines**: `rgba(0,0,0,0.06)` (Precision markers)
-    - **Surface/Panels**: `#FFFFFF` (Clean white sheets)
-    - **Primary Accent**: `#FF2E00` (The "Appreciation" tag red - High energy)
-    - **Text High-Contrast**: `#0A0A0A` (Stark black)
-    - **Text Muted**: `#545454` (Technical gray)
-- **Typography**:
-    - Headings: **Inter / Helvetica Now** (Bold, tight tracking).
-    - Code: **JetBrains Mono** or **Fira Code**.
-- **Forms/UI**:
-    - Pill-shaped buttons (`border-radius: 99px`).
-    - Glassmorphism only on overlapping panels.
-    - 3D Metallic/Matte textures for tool icons (Compass/Pen feel).
+## 2. Features Implemented
 
-## 3. User Interface Layout (The 3-Pane "Workbench")
+### Core Workbench
+- **Drag & Drop Interface**: Seamlessly drag components from the library to the canvas.
+- **Live Canvas**: An interactive workspace with grid backgrounds and smart selection handling.
+- **Smart Selection**: Click to select, resize, and move elements (absolute positioning support).
 
-### Left Sidebar: The "Depot" (Component Library)
-- **Categories**: Layouts, Forms, Typography, Media, AI Lab.
-- **Interaction**: Drag and drop cards.
-- **Visuals**: Vertical list, small thumbnail previews, minimalistic icons.
+### Component Library ("The Depot")
+- **Container**: Flex-ready box containers.
+- **Card Basic**: Pre-styled cards with editable title and text.
+- **Hero Section**: Full-width header blocks.
+- **Text Block**: Editable paragraphs.
+- **Button Primary**: Pill-shaped call-to-action buttons.
+- **Image**: Placeholder blocks for media.
+- **Input Field**: Form elements for UI mocking.
 
-### Center: The "Canvas" (Live Workspace)
-- **Background**: Infinite dot or crosshair grid (from the image).
-- **Behavior**:
-    - **Selection Engine**: Blue/Red bounding boxes when hovering elements.
-    - **Smart Guides**: Snap-to-grid alignment lines (red dashed).
-    - **Live Edit**: Double-click text to edit, drag handles to resize.
+### Inspector Panel ("The Properties")
+A comprehensive property editor that updates in real-time.
 
-### Right Sidebar: The "Inspector" (Properties)
-- **Tabs**: Design (CSS), Config (Attributes), AI (Prompts).
-- **Controls**: Sliders for padding/margin, Color pickers with swatches, Dropdowns for fonts.
+**Typography Suite**
+- **Font**: Inter, JetBrains Mono, Serif, Arial.
+- **Weight**: 400 (Reg) to 800 (Extra Bold).
+- **Styling**: Italic, Underline, Text Align (Left, Center, Right).
+- **Format**: Uppercase, Lowercase, Capitalize.
+- **Metrics**: Font Size, Line Height, Letter Spacing.
+- **Color**: Custom text color picker.
 
-## 4. Technical Architecture
-- **Tech Stack**: Vanilla JS (Keep it fast) or Vue/React if scaling. *Decision: Vanilla JS + Custom Web Components for speed.*
-- **Core Modules**:
-    - `DragDropEngine`: Handles coordinate mapping and insert positions.
-    - `ComponentRegistry`: JSON-based definition of all available blocks.
-    - `CodeGenerator`: Traverses the DOM tree and outputs clean HTML/CSS.
-    - `StyleInjector`: Reactively updates CSS variables.
+**Layout & Positioning**
+- **Dimensions**: Width, Height (px, %, auto).
+- **Box Model**: Margin, Padding.
+- **Positioning**: Static, Relative, Absolute, Fixed. Supports Top/Left/Right/Bottom coordinates and Z-Index.
+- **Flexbox**: Context-aware controls (Direction, Wrap, Justify, Align, Gap) that appear only when a container is selected.
 
-## 5. Roadmap
-### Phase 1: Foundation (Current)
-- Set up the grid layout.
-- Implement the "Momentum" theme (CSS Variables).
-- Create basic drag-and-drop zones.
+**Appearance & Theming**
+- **Background**: Color picker for custom backgrounds.
+- **Theme Presets**: 20+ curated themes (Glassmorphism, Sunset, Cyberpunk, Midnight, etc.).
+- **Intensity**: Opacity control for themes.
+- **Borders**: Corner Radius, Border styling.
+- **Effects**: Box Shadows (Soft, Medium, Float).
 
-### Phase 2: Core Components
-- Build the component library (Cards, Navbars, Heroes).
-- Implement the Properties Panel for basic CSS (Color, Font Size).
+### Tools & Utilities
+- **Preview Mode**: Toggle between "Edit Mode" and "View Only" to test interactions.
+- **Export**: Generates clean HTML of the current canvas and copies it to the clipboard.
+- **Auto-Save**: State is automatically persisted to LocalStorage.
+- **AI Command Bar**: (Beta) Text-based insertion of components (e.g., "add card", "hero").
 
-### Phase 3: Intelligence
-- Integrate AI (OpenAI/Gemini API mock) for "Text to Component".
-- "Smart Copy" (One-click HTML export).
+## 3. Visual Identity
+The project follows the **"Momentum"** design language:
+- **Colors**: Industrial Grays (`#F0F0F2`), Primary Red (`#FF2E00`) for actions.
+- **Icons**: Ionicons for a clean, technical look.
+- **Textures**: Glassmorphism and subtle gradients for a premium feel.
 
-### Phase 4: Polish
-- Add 3D-style micro-animations.
-- Dark Mode toggle (Inverse metallic palette).
+## 4. Technical Stack
+- **Core**: Vanilla JavaScript (Zero dependencies).
+- **Icons**: Ionicons (ESM).
+- **Font**: Google Fonts (Inter, JetBrains Mono).
 
----
-
-# Next Steps
-I will now generate the **Core Theme (CSS)** and the **Main Layout (HTML)** to visualize this concept.
+## 5. Upcoming Roadmap
+- [ ] **Publish Functionality**: Save builds to server/file.
+- [ ] **Advanced AI**: Integrate LLM for "Text to Layout" generation.
+- [ ] **Multi-Page Support**: Create and manage multiple views.
+- [ ] **Component Saving**: Save custom composites as new library items.
