@@ -33,19 +33,19 @@ const Nexus = {
         const welcome = clone.querySelector('.welcome-msg');
         if (welcome) welcome.remove();
 
-        // Clean up attributes
+        // Clean up attributes and styles
         const allElements = clone.querySelectorAll('*');
         allElements.forEach(el => {
             el.removeAttribute('contenteditable');
             el.removeAttribute('draggable');
-            el.classList.remove('nexus-component'); // Remove builder hook class if desired, or keep for styling
-            // Note: If 'nexus-component' provides essential CSS (like relative positioning), we should keep or replace it.
-            // checking style.css: .nexus-component { position: relative; min-height: 20px; }
-            // essential for layout? maybe. Let's start by ONLY removing contenteditable.
+            el.classList.remove('nexus-component');
 
-            // Re-adding nexus-component removal might break layout if specific styles are attached.
-            // Safest bet for "clean" export is removing contenteditable. 
-            // The user specifically asked "editbel text ... change that bug".
+            // Fix Inputs: Remove pointer-events: none if present so they are clickable
+            if (el.tagName === 'INPUT' || el.tagName === 'BUTTON' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                if (el.style.pointerEvents === 'none') {
+                    el.style.pointerEvents = 'auto';
+                }
+            }
         });
 
         // Specific cleanup for editable text nodes to ensure they are static
@@ -690,24 +690,117 @@ const Nexus = {
         } else if (type === 'Text Block') {
             el.innerText = 'Lorem ipsum text block.';
             el.contentEditable = 'true';
+        } else if (type === 'Admin Dashboard') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.style.height = '600px';
+            el.style.display = 'flex';
+            el.style.background = '#f4f6f8';
+            el.innerHTML = `
+                <!-- Sidebar -->
+                <div style="width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column;">
+                    <div style="font-size: 20px; font-weight: bold; margin-bottom: 40px;">AdminPanel</div>
+                    <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Dashboard</div>
+                    <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Users</div>
+                    <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">Settings</div>
+                </div>
+                <!-- Main Content -->
+                <div style="flex: 1; padding: 40px;">
+                    <h2 contenteditable="true">Dashboard Overview</h2>
+                    <div style="display: flex; gap: 20px; margin-top: 20px;">
+                        <div style="flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <h4 style="margin:0 0 10px 0;">Total Users</h4>
+                            <div style="font-size: 24px; font-weight: bold;">1,234</div>
+                        </div>
+                        <div style="flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <h4 style="margin:0 0 10px 0;">Revenue</h4>
+                            <div style="font-size: 24px; font-weight: bold;">$12,345</div>
+                        </div>
+                        <div style="flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <h4 style="margin:0 0 10px 0;">Orders</h4>
+                            <div style="font-size: 24px; font-weight: bold;">89</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (type === 'Auth Page') {
+            el.classList.add('nexus-container');
+            el.style.width = '100%';
+            el.style.padding = '80px 20px';
+            el.style.background = '#f0f2f5';
+            el.style.display = 'flex';
+            el.style.justifyContent = 'center';
+            el.style.alignItems = 'center';
+            el.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; text-align: center;">
+                    <h2 contenteditable="true" style="margin-bottom: 20px;">Welcome Back</h2>
+                    <input type="text" placeholder="Email Address" style="width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 24px; border: 1px solid #ddd; border-radius: 6px;">
+                    <button style="width: 100%; padding: 12px; background: #FF3B30; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Sign In</button>
+                    <p style="margin-top: 20px; font-size: 14px; color: #666;" contenteditable="true">Don't have an account? <span style="color: #FF3B30;">Sign up</span></p>
+                </div>
+            `;
         }
 
         return el;
     },
 
     handleCommand(cmd) {
-        let type = '';
-        if (cmd.includes('card')) type = 'Card Basic';
-        else if (cmd.includes('box')) type = 'Container';
-        else if (cmd.includes('btn')) type = 'Button Primary';
-        else if (cmd.includes('input')) type = 'Input Field';
+        // Map short codes to internal component types
+        const typeMap = {
+            'card': 'Card Basic',
+            'box': 'Container',
+            'container': 'Container',
+            'div': 'Container',
+            'hero': 'Hero Section',
+            'btn': 'Button Primary',
+            'button': 'Button Primary',
+            'img': 'Image Placeholder',
+            'image': 'Image Placeholder',
+            'input': 'Input Field',
+            'text': 'Text Block',
+            'p': 'Text Block',
+            'admin': 'Admin Dashboard',
+            'auth': 'Auth Page'
+        };
 
-        if (type) {
-            const newEl = this.createComponent(type);
-            this.canvas.appendChild(newEl);
-            this.selectElement(newEl);
+        const parts = cmd.split('>').map(s => s.trim().toLowerCase());
+
+        // Root element to append to canvas
+        let root = null;
+        let parent = null;
+
+        parts.forEach(part => {
+            // Find type based on keys
+            // We check if the part includes the key to allow for things like "red card" (future expansion)
+            // For now, strict mapping or "includes" check.
+            let matchedType = null;
+            Object.keys(typeMap).forEach(key => {
+                if (part === key || part.includes(key)) {
+                    matchedType = typeMap[key];
+                }
+            });
+
+            if (matchedType) {
+                const newEl = this.createComponent(matchedType);
+
+                if (!root) {
+                    root = newEl;
+                } else {
+                    parent.appendChild(newEl);
+                }
+                parent = newEl;
+            }
+        });
+
+        if (root) {
+            this.canvas.appendChild(root);
+            this.selectElement(root);
             this.canvas.scrollTop = this.canvas.scrollHeight;
             this.saveState();
+        } else {
+            // Fallback for empty or unknown
+            console.log("AI: No matching component for command:", cmd);
         }
     },
 
