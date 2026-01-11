@@ -237,9 +237,46 @@
             </div>
 
             <div class="prop-group" id="image-controls" style="display:none;">
-                <label class="prop-label">Image</label>
-                <div class="input-row">
+                <label class="prop-label">Image Properties</label>
+                <div class="input-row" style="margin-bottom: 8px;">
                     <input type="text" id="prop-src" placeholder="Image URL (https://...)">
+                </div>
+                <!-- Object Fit -->
+                <div class="input-row">
+                    <select id="prop-object-fit">
+                        <option value="fill">Fit: Fill</option>
+                        <option value="contain">Contain</option>
+                        <option value="cover">Cover</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="prop-group">
+                <label class="prop-label">Animation</label>
+                <!-- ... existing animation ... -->
+                <div class="input-row" style="margin-bottom:8px;">
+                    <select id="prop-anim">
+                        <option value="">None</option>
+                        <option value="fade-in">Fade In</option>
+                        <option value="slide-up">Slide Up</option>
+                        <option value="slide-left">Slide Left</option>
+                        <option value="slide-right">Slide Right</option>
+                        <option value="zoom-in">Zoom In</option>
+                        <option value="bounce">Bounce</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="prop-group" id="hover-controls">
+                <label class="prop-label">Hover Effects</label>
+                <div class="input-row">
+                    <select id="prop-hover">
+                        <option value="">Hover: None</option>
+                        <option value="hover-opacity">Opacity Fade</option>
+                        <option value="hover-scale">Scale Up</option>
+                        <option value="hover-lift">Lift Up</option>
+                        <option value="hover-glow">Glow</option>
+                    </select>
                 </div>
             </div>
 

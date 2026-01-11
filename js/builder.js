@@ -158,7 +158,10 @@ const Nexus = {
             align: document.getElementById('prop-align'),
             gap: document.getElementById('prop-gap'),
             // Image
-            src: document.getElementById('prop-src')
+            src: document.getElementById('prop-src'),
+            objectFit: document.getElementById('prop-object-fit'),
+            anim: document.getElementById('prop-anim'),
+            hover: document.getElementById('prop-hover')
         };
 
         this.flexGroup = document.getElementById('flex-controls');
@@ -290,7 +293,14 @@ const Nexus = {
         // Selection
         this.canvas.addEventListener('click', (e) => {
             if (this.isResizing || this.isMoving) return;
+
+            // Prevent default action for links/buttons to avoid navigation/submission
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+                e.preventDefault();
+            }
+
             e.stopPropagation();
+
             const target = e.target.closest('.nexus-component');
             if (target) {
                 this.selectElement(target);
@@ -339,6 +349,37 @@ const Nexus = {
                 }
             });
         }
+
+        // Image & Animation Bindings
+        const bindSelect = (input, styleProp) => {
+            if (input) input.addEventListener('change', (e) => {
+                if (this.selectedElement) {
+                    // If targeting Image specific prop
+                    if (styleProp === 'objectFit') {
+                        const img = this.selectedElement.tagName === 'IMG' ? this.selectedElement : this.selectedElement.querySelector('img');
+                        if (img) img.style.objectFit = e.target.value;
+                    } else if (styleProp === 'animation') {
+                        // Reset animation
+                        this.selectedElement.style.animation = 'none';
+                        this.selectedElement.offsetHeight; // trigger reflow
+                        this.selectedElement.className = this.selectedElement.className.replace(/fade-in|slide-up|slide-left|slide-right|zoom-in|bounce/g, '').trim();
+                        if (e.target.value) {
+                            this.selectedElement.classList.add(e.target.value);
+                        }
+                    } else if (styleProp === 'hover') {
+                        this.selectedElement.className = this.selectedElement.className.replace(/hover-opacity|hover-scale|hover-lift|hover-glow/g, '').trim();
+                        if (e.target.value) {
+                            this.selectedElement.classList.add(e.target.value);
+                        }
+                    }
+                    this.saveState();
+                }
+            });
+        };
+
+        bindSelect(this.props.objectFit, 'objectFit');
+        bindSelect(this.props.anim, 'animation');
+        bindSelect(this.props.hover, 'hover');
 
         // Dimensions
         bind(this.props.width, 'width');
@@ -590,11 +631,42 @@ const Nexus = {
         }
 
         const rect = this.selectedElement.getBoundingClientRect();
+        // Calculate offset from top-left of element to mouse position
         this.moveStart = {
-            mouseX: e.clientX,
-            mouseY: e.clientY,
-            elemLeft: this.selectedElement.offsetLeft,
-            elemTop: this.selectedElement.offsetTop
+            offsetX: e.clientX - rect.left,
+            offsetY: e.clientY - rect.top,
+        };
+
+        // If relative/static, convert to absolute for dragging if needed, 
+        // OR better: use transform/margin logic? 
+        // Current logic assumes absolute.
+        // If absolute, 'left' refers to offsetParent. 
+        // The original implementation used elemLeft which is offsetLeft.
+        // Problem: 'much gap' suggests jump.
+        // Correct approach for absolute drag:
+        // New Left = MouseX - ParentOffsetX - InitialMouseOffsetInElement
+
+        // Let's stick closer to original but ensure we track the delta correctly.
+        // Original: dx = clientX - initialClientX; newLeft = initialLeft + dx.
+        // This is mathematically sound for preserving relative position.
+        // If there's a gap, it might be due to static -> absolute conversion.
+
+        // Fix for "Much Gap":
+        // When switching to absolute, we set left/top to current offsets.
+        // We must ensure this happens BEFORE we record values.
+
+        if (style.position === 'static') {
+            this.selectedElement.style.left = this.selectedElement.offsetLeft + 'px';
+            this.selectedElement.style.top = this.selectedElement.offsetTop + 'px';
+            this.selectedElement.style.position = 'absolute';
+            if (this.props.position) this.props.position.value = 'absolute';
+        }
+
+        this.moveStart = {
+            introX: e.clientX,
+            introY: e.clientY,
+            initialLeft: parseFloat(this.selectedElement.style.left) || this.selectedElement.offsetLeft,
+            initialTop: parseFloat(this.selectedElement.style.top) || this.selectedElement.offsetTop
         };
     },
 
@@ -616,10 +688,13 @@ const Nexus = {
         }
 
         if (this.isMoving && this.selectedElement) {
-            const dx = e.clientX - this.moveStart.mouseX;
-            const dy = e.clientY - this.moveStart.mouseY;
-            this.selectedElement.style.left = (this.moveStart.elemLeft + dx) + 'px';
-            this.selectedElement.style.top = (this.moveStart.elemTop + dy) + 'px';
+            const dx = e.clientX - this.moveStart.introX;
+            const dy = e.clientY - this.moveStart.introY;
+
+            // Apply delta to initial stored position
+            this.selectedElement.style.left = (this.moveStart.initialLeft + dx) + 'px';
+            this.selectedElement.style.top = (this.moveStart.initialTop + dy) + 'px';
+
             if (this.props.left) this.props.left.value = this.selectedElement.style.left;
             if (this.props.top) this.props.top.value = this.selectedElement.style.top;
         }
@@ -646,6 +721,7 @@ const Nexus = {
                 <div class="resize-handle handle-e"></div>
                 <div class="resize-handle handle-s"></div>
             `;
+
             el.appendChild(overlay);
             this.selectionBox = overlay;
 
@@ -723,10 +799,30 @@ const Nexus = {
         val('align', comp.alignItems);
         val('gap', comp.gap === 'normal' ? '' : comp.gap);
 
-        // Image Src
+        // Image Src & Props
         if (this.props.src) {
             const img = el.tagName === 'IMG' ? el : el.querySelector('img');
             this.props.src.value = img ? img.getAttribute('src') : '';
+
+            if (this.props.objectFit) {
+                this.props.objectFit.value = img ? (img.style.objectFit || 'fill') : 'fill';
+            }
+        }
+
+        // Animation
+        if (this.props.anim) {
+            const classes = Array.from(el.classList);
+            const anims = ['fade-in', 'slide-up', 'slide-left', 'slide-right', 'zoom-in', 'bounce'];
+            const found = classes.find(c => anims.includes(c));
+            this.props.anim.value = found || '';
+        }
+
+        // Hover
+        if (this.props.hover) {
+            const classes = Array.from(el.classList);
+            const hovers = ['hover-opacity', 'hover-scale', 'hover-lift', 'hover-glow'];
+            const found = classes.find(c => hovers.includes(c));
+            this.props.hover.value = found || '';
         }
     },
 
@@ -777,14 +873,30 @@ const Nexus = {
             el.innerHTML = '<button style="padding:10px 20px; background:#FF3B30; color:white; border:none; border-radius:99px;" contenteditable="true">Button</button>';
             el.style.display = 'inline-block';
         } else if (type === 'Image Placeholder') {
-            const imgEl = document.createElement('img');
-            imgEl.className = 'nexus-component';
-            imgEl.src = 'https://via.placeholder.com/300x200';
-            imgEl.style.width = '100%';
-            imgEl.style.maxWidth = '300px';
-            imgEl.style.height = 'auto';
-            imgEl.style.display = 'block';
-            return imgEl;
+            let url = prompt('Enter Image URL:', 'https://via.placeholder.com/300x200');
+            if (!url) return null; // Cancelled
+
+            el.style.width = '300px';
+            el.style.height = '200px';
+            el.style.display = 'inline-block';
+            el.style.overflow = 'hidden'; // Ensure image stays inside
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            img.style.display = 'block';
+
+            el.appendChild(img);
+            // Return el (the wrapper) implicitly as we fall through, 
+            // but we must NOT return imgEl anymore.
+            // note: previous code 'return imgEl' bypassed the end of function return? 
+            // check createComponent structure.
+            // createComponent creates 'el' at top. It usually falls through to return el?
+            // Let's check where the function ends. Use view_file slightly larger range if needed or just remove 'return imgEl'.
+            // The default is to return 'el' if we don't return early.
+            // So we just configure 'el' and let it return.
         } else if (type === 'Input Field') {
             el.innerHTML = '<input type="text" placeholder="Input..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; pointer-events:none;">';
             el.style.width = '100%';
