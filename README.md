@@ -1,5 +1,5 @@
 # QuickEdit: Nexus Builder
-
+Open to try(https://kthacking.github.io/QuickEdi/)
 **Nexus Builder** is a powerful, lightweight, visual site builder designed for **QuickEdi**. It transforms a standard coding environment into a "Progress over Perfection" drag-and-drop workbench, bridging the gap between design and code with an industrial, precise, and efficient workflow.
 
 ## 🚀 Features
